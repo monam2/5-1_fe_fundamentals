@@ -5,6 +5,7 @@ import App from './App';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './libs/query-client';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Toaster } from 'sonner';
 
 async function enableMocking() {
 	const { worker } = await import('./mocks/browser');
@@ -19,6 +20,7 @@ enableMocking().then(() => {
 			<QueryClientProvider client={queryClient}>
 				<App />
 				<ReactQueryDevtools />
+				<Toaster />
 			</QueryClientProvider>
 		</React.StrictMode>,
 	);

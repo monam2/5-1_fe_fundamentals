@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+import { toast } from 'sonner';
 import InfinityScroll from '@/components/infinity-scroll/infinity-scroll';
 import { productsQuery } from '../../api/products.query';
 import type { ProductsRequest } from '../../api/products.types';
@@ -14,6 +15,7 @@ export const ProductsInfinityList = ({
 }: ProductsInfinityListProps) => {
 	const {
 		data,
+		error,
 		fetchNextPage,
 		hasNextPage,
 		isFetchingNextPage,
@@ -21,28 +23,26 @@ export const ProductsInfinityList = ({
 		isError,
 	} = useInfiniteQuery(productsQuery.getInfiniteProductsQueryOptions(filters));
 
-	const products = data?.pages.flatMap((page) => page.products) ?? [];
+	useEffect(() => {
+		if (isError) {
+			toast.error(error.message);
+		}
+	}, [isError, error]);
 
 	const handleFetchMore = useCallback(async () => {
 		await fetchNextPage();
 	}, [fetchNextPage]);
 
-	if (isLoading) {
-		return <p>로딩 중...</p>;
-	}
+	const products = data?.pages.flatMap((page) => page.products) ?? [];
 
-	if (isError) {
-		return <p>에러가 발생했습니다.</p>;
-	}
-
-	if (data && products.length === 0) {
-		return <p>검색 결과가 없습니다.</p>;
-	}
+	const isBlank = !isLoading && products.length === 0;
 
 	return (
 		<InfinityScroll
 			onFetchMore={handleFetchMore}
-			disabled={!hasNextPage}
+			error={isError}
+			onRetry={handleFetchMore}
+			disabled={!hasNextPage || isError}
 			loading={isFetchingNextPage}
 		>
 			<div className="grid grid-cols-2 gap-4">
@@ -53,6 +53,7 @@ export const ProductsInfinityList = ({
 					/>
 				))}
 			</div>
+			{isBlank && <p>검색 결과가 없습니다.</p>}
 		</InfinityScroll>
 	);
 };

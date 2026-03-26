@@ -1,19 +1,19 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface InfinityScrollProps extends React.HTMLAttributes<HTMLDivElement> {
 	onFetchMore: () => void;
-	threshold?: number;
+	error?: boolean;
+	onRetry?: () => void;
 	loading?: boolean;
-	loader?: React.ReactNode;
 	disabled?: boolean;
 }
 
 const InfinityScroll = ({
 	onFetchMore,
+	onRetry,
+	error,
 	loading = false,
 	disabled = false,
-	threshold = 0.8,
-	loader = <DefaultLoader />,
 	children,
 	...rest
 }: InfinityScrollProps) => {
@@ -23,28 +23,33 @@ const InfinityScroll = ({
 		const sentinel = sentinelRef.current;
 		if (!sentinel || loading || disabled) return;
 
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry.isIntersecting) onFetchMore();
-			},
-			{ rootMargin: `0px 0px ${Math.round(threshold * 100)}% 0px` },
-		);
+		const observer = new IntersectionObserver(([entry]) => {
+			if (entry.isIntersecting) onFetchMore();
+		});
 
 		observer.observe(sentinel);
 		return () => observer.disconnect();
-	}, [loading, disabled, onFetchMore, threshold]);
+	}, [loading, disabled, onFetchMore]);
 
 	return (
 		<div {...rest}>
 			{children}
 			<div ref={sentinelRef} />
 			{loading && (
-				<div className="flex w-full justify-center py-4">{loader}</div>
+				<div className="flex w-full justify-center py-4">Loading...</div>
+			)}
+			{error && onRetry && (
+				<div className="flex w-full justify-center py-4">
+					<button
+						type="button"
+						onClick={onRetry}
+					>
+						다시 시도
+					</button>
+				</div>
 			)}
 		</div>
 	);
 };
-
-const DefaultLoader = () => <span>Loading...</span>;
 
 export default InfinityScroll;

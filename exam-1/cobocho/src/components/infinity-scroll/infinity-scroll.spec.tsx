@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import InfinityScroll from './infinity-scroll';
 
 const mockIntersectionObserver = (isIntersecting: boolean) => {
@@ -87,15 +88,50 @@ describe('InfinityScroll', () => {
 		expect(screen.getByText('Loading...')).toBeInTheDocument();
 	});
 
-	it('커스텀 loader를 렌더링한다', () => {
+	it('error와 onRetry가 있으면 다시 시도 버튼을 렌더링한다', () => {
 		mockIntersectionObserver(false);
 
 		render(
-			<InfinityScroll onFetchMore={vi.fn()} loading loader={<span>로딩 중...</span>}>
+			<InfinityScroll
+				onFetchMore={vi.fn()}
+				error
+				onRetry={vi.fn()}
+			>
 				<p>아이템</p>
 			</InfinityScroll>,
 		);
 
-		expect(screen.getByText('로딩 중...')).toBeInTheDocument();
+		expect(screen.getByText('다시 시도')).toBeInTheDocument();
+	});
+
+	it('다시 시도 버튼을 클릭하면 onRetry를 호출한다', async () => {
+		mockIntersectionObserver(false);
+		const onRetry = vi.fn();
+
+		render(
+			<InfinityScroll
+				onFetchMore={vi.fn()}
+				error
+				onRetry={onRetry}
+			>
+				<p>아이템</p>
+			</InfinityScroll>,
+		);
+
+		await userEvent.click(screen.getByText('다시 시도'));
+
+		expect(onRetry).toHaveBeenCalledTimes(1);
+	});
+
+	it('error가 없으면 다시 시도 버튼을 렌더링하지 않는다', () => {
+		mockIntersectionObserver(false);
+
+		render(
+			<InfinityScroll onFetchMore={vi.fn()} onRetry={vi.fn()}>
+				<p>아이템</p>
+			</InfinityScroll>,
+		);
+
+		expect(screen.queryByText('다시 시도')).not.toBeInTheDocument();
 	});
 });

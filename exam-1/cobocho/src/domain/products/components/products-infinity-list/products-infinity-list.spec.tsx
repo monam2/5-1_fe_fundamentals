@@ -1,11 +1,18 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import type {
 	ProductsRequest,
 	ProductsResponse,
 } from '../../api/products.types';
 import { ProductsInfinityList } from './products-infinity-list';
+
+vi.mock('sonner', () => ({
+	toast: { error: vi.fn() },
+}));
+
+import { toast } from 'sonner';
 
 vi.mock('../../api/products.service', () => ({
 	productsService: {
@@ -56,18 +63,16 @@ const createWrapper = () => {
 };
 
 describe('ProductsInfinityList', () => {
-	afterEach(() => {
-		vi.clearAllMocks();
+	beforeEach(() => {
+		window.IntersectionObserver = vi.fn().mockImplementation(() => ({
+			observe: vi.fn(),
+			disconnect: vi.fn(),
+			unobserve: vi.fn(),
+		}));
 	});
 
-	it('로딩 중일 때 로딩 표시가 보인다', () => {
-		mockGetProducts.mockReturnValue(new Promise(() => {}));
-
-		render(<ProductsInfinityList filters={defaultFilters} />, {
-			wrapper: createWrapper(),
-		});
-
-		expect(screen.getByText('로딩 중...')).toBeInTheDocument();
+	afterEach(() => {
+		vi.resetAllMocks();
 	});
 
 	it('상품 데이터를 불러와 카드로 렌더링한다', async () => {
@@ -82,7 +87,7 @@ describe('ProductsInfinityList', () => {
 		});
 	});
 
-	it('API 에러 시 에러 메시지가 표시된다', async () => {
+	it('API 에러 시 toast.error가 호출되고 다시 시도 버튼이 표시된다', async () => {
 		mockGetProducts.mockRejectedValue(new Error('server error'));
 
 		render(<ProductsInfinityList filters={defaultFilters} />, {
@@ -91,10 +96,36 @@ describe('ProductsInfinityList', () => {
 
 		await waitFor(
 			() => {
-				expect(screen.getByText('에러가 발생했습니다.')).toBeInTheDocument();
+				expect(toast.error).toHaveBeenCalledWith('server error');
 			},
-			{ timeout: 3000 },
+			{ timeout: 5000 },
 		);
+
+		expect(screen.getByText('다시 시도')).toBeInTheDocument();
+	});
+
+	it('다시 시도 버튼을 클릭하면 재요청한다', async () => {
+		mockGetProducts
+			.mockRejectedValueOnce(new Error('server error'))
+			.mockRejectedValueOnce(new Error('server error'))
+			.mockResolvedValueOnce(mockResponse(1, 1));
+
+		render(<ProductsInfinityList filters={defaultFilters} />, {
+			wrapper: createWrapper(),
+		});
+
+		await waitFor(
+			() => {
+				expect(screen.getByText('다시 시도')).toBeInTheDocument();
+			},
+			{ timeout: 5000 },
+		);
+
+		await userEvent.click(screen.getByText('다시 시도'));
+
+		await waitFor(() => {
+			expect(screen.getByText('상품 1')).toBeInTheDocument();
+		});
 	});
 
 	it('결과가 없으면 빈 상태 안내가 표시된다', async () => {
