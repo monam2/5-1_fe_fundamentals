@@ -89,11 +89,13 @@ export const AutoComplete = ({
 				aria-activedescendant={
 					activeIndex >= 0 ? `autocomplete-option-${activeIndex}` : undefined
 				}
+				placeholder="검색어를 입력하세요"
+				className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-black"
 			/>
 			{open && items.length > 0 && (
 				<div
 					role="listbox"
-					className="absolute left-0 top-full z-10 w-full bg-white shadow-md"
+					className="absolute left-0 top-full z-10 mt-1 w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
 				>
 					{items.map((child, index) => {
 						const itemValue = child.props.value;
@@ -104,7 +106,7 @@ export const AutoComplete = ({
 								role="option"
 								aria-selected={index === activeIndex}
 								tabIndex={-1}
-								className={index === activeIndex ? 'bg-gray-100' : ''}
+								className={`cursor-pointer px-3 py-2 text-sm ${index === activeIndex ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
 								onClick={() => selectItem(itemValue)}
 								onKeyDown={(e) => {
 									if (e.key === 'Enter') selectItem(itemValue);

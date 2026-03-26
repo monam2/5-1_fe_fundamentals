@@ -22,7 +22,7 @@ describe('URL 동기화', () => {
 		const user = userEvent.setup();
 		render(<App />, { wrapper: createWrapper() });
 
-		await user.click(screen.getByLabelText('신발'));
+		await user.click(screen.getByText('신발'));
 
 		const params = new URLSearchParams(window.location.search);
 		expect(params.get('categories')).toBe('shoes');
@@ -53,10 +53,10 @@ describe('URL 동기화', () => {
 		render(<App />, { wrapper: createWrapper() });
 
 		expect(screen.getByRole('combobox')).toHaveDisplayValue('아디다스');
-		expect(screen.getByLabelText('신발')).toBeChecked();
-		expect(screen.getByLabelText('상의')).toBeChecked();
-		expect(screen.getByLabelText('하의')).not.toBeChecked();
-		expect(screen.getByText('평점순')).toHaveClass('text-black');
+		expect(screen.getByText('신발')).toHaveAttribute('aria-pressed', 'true');
+		expect(screen.getByText('상의')).toHaveAttribute('aria-pressed', 'true');
+		expect(screen.getByText('하의')).toHaveAttribute('aria-pressed', 'false');
+		expect(screen.getByText('평점순')).toHaveAttribute('aria-pressed', 'true');
 	});
 
 	it('초기화 버튼을 누르면 필터/정렬 쿼리스트링이 비워진다', async () => {

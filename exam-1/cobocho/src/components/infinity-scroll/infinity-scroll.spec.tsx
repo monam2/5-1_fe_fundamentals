@@ -76,16 +76,16 @@ describe('InfinityScroll', () => {
 		expect(onFetchMore).not.toHaveBeenCalled();
 	});
 
-	it('loading 중이면 loader를 렌더링한다', () => {
+	it('loading 중이면 스피너를 렌더링한다', () => {
 		mockIntersectionObserver(false);
 
-		render(
+		const { container } = render(
 			<InfinityScroll onFetchMore={vi.fn()} loading>
 				<p>아이템</p>
 			</InfinityScroll>,
 		);
 
-		expect(screen.getByText('Loading...')).toBeInTheDocument();
+		expect(container.querySelector('.animate-spin')).toBeInTheDocument();
 	});
 
 	it('error가 있으면 다시 시도 버튼을 렌더링한다', () => {

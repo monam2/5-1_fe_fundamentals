@@ -1,4 +1,5 @@
 import './App.css';
+import { VStack } from '@/components/layout';
 import type { ProductsRequest } from './domain/products/api/products.types';
 import {
 	categorySchema,
@@ -28,13 +29,19 @@ function App() {
 	});
 
 	return (
-		<div>
-			<ProductSearchFilter
-				value={filters}
-				onChange={setFilters}
-			/>
-			<ProductsInfinityList filters={filters} />
-		</div>
+		<VStack
+			gap={6}
+			className="mx-auto max-w-4xl px-4 py-8"
+		>
+			<h1 className="text-2xl font-bold">상품 목록</h1>
+			<VStack gap={2}>
+				<ProductSearchFilter
+					value={filters}
+					onChange={setFilters}
+				/>
+				<ProductsInfinityList filters={filters} />
+			</VStack>
+		</VStack>
 	);
 }
 

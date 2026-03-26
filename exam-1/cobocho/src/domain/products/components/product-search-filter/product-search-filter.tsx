@@ -1,8 +1,9 @@
+import { Card } from '@/components/card/card';
+import { HStack, VStack } from '@/components/layout';
 import {
 	ToggleGroup,
 	ToggleGroupItem,
 } from '@/components/toggle-group/toggle-group';
-import { cn } from '@/libs/cn';
 import type {
 	Category,
 	ProductsRequest,
@@ -33,53 +34,62 @@ export const ProductSearchFilter = ({
 	};
 
 	return (
-		<div className="flex items-center gap-4">
-			<ProductAutoComplete
-				value={value.keyword ?? ''}
-				onChange={(keyword) => onChange({ keyword: keyword || null })}
-			/>
-			<ToggleGroup
-				type="multiple"
-				value={categories}
-				onChange={(next) =>
-					onChange({
-						categories: next.length > 0 ? (next as Category[]) : null,
-					})
-				}
-			>
-				{(Object.keys(CATEGORY_LABELS) as Category[]).map((category) => (
-					<ToggleGroupItem
-						key={category}
-						value={category}
-					>
-						{CATEGORY_LABELS[category]}
-					</ToggleGroupItem>
-				))}
-			</ToggleGroup>
-			<ToggleGroup
-				type="single"
-				value={value.sort}
-				onChange={(next) =>
-					onChange({ sort: next as ProductsSortOption | null })
-				}
-			>
-				{(Object.keys(SORT_OPTION_LABELS) as ProductsSortOption[]).map(
-					(option) => (
-						<ToggleGroupItem
-							key={option}
-							value={option}
+		<Card>
+			<VStack gap={4}>
+				<ProductAutoComplete
+					value={value.keyword ?? ''}
+					onChange={(keyword) => onChange({ keyword: keyword || null })}
+				/>
+				<HStack gap={4} wrap>
+					<HStack gap={2}>
+						<span className="text-sm font-medium text-gray-500">카테고리</span>
+						<ToggleGroup
+							type="multiple"
+							value={categories}
+							onChange={(next) =>
+								onChange({
+									categories:
+										next.length > 0 ? (next as Category[]) : null,
+								})
+							}
 						>
-							{SORT_OPTION_LABELS[option]}
-						</ToggleGroupItem>
-					),
-				)}
-			</ToggleGroup>
-			<button
-				type="button"
-				onClick={resetFilters}
-			>
-				초기화
-			</button>
-		</div>
+							{(Object.keys(CATEGORY_LABELS) as Category[]).map(
+								(category) => (
+									<ToggleGroupItem key={category} value={category}>
+										{CATEGORY_LABELS[category]}
+									</ToggleGroupItem>
+								),
+							)}
+						</ToggleGroup>
+					</HStack>
+					<div className="h-5 w-px bg-gray-200" />
+					<HStack gap={2}>
+						<span className="text-sm font-medium text-gray-500">정렬</span>
+						<ToggleGroup
+							type="single"
+							value={value.sort}
+							onChange={(next) =>
+								onChange({ sort: next as ProductsSortOption | null })
+							}
+						>
+							{(Object.keys(SORT_OPTION_LABELS) as ProductsSortOption[]).map(
+								(option) => (
+									<ToggleGroupItem key={option} value={option}>
+										{SORT_OPTION_LABELS[option]}
+									</ToggleGroupItem>
+								),
+							)}
+						</ToggleGroup>
+					</HStack>
+					<button
+						type="button"
+						className="ml-auto rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-100"
+						onClick={resetFilters}
+					>
+						초기화
+					</button>
+				</HStack>
+			</VStack>
+		</Card>
 	);
 };
