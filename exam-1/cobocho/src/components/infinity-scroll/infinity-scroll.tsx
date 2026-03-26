@@ -3,14 +3,12 @@ import React, { useEffect, useRef } from 'react';
 interface InfinityScrollProps extends React.HTMLAttributes<HTMLDivElement> {
 	onFetchMore: () => void;
 	error?: boolean;
-	onRetry?: () => void;
 	loading?: boolean;
 	disabled?: boolean;
 }
 
 const InfinityScroll = ({
 	onFetchMore,
-	onRetry,
 	error,
 	loading = false,
 	disabled = false,
@@ -38,12 +36,9 @@ const InfinityScroll = ({
 			{loading && (
 				<div className="flex w-full justify-center py-4">Loading...</div>
 			)}
-			{error && onRetry && (
+			{error && (
 				<div className="flex w-full justify-center py-4">
-					<button
-						type="button"
-						onClick={onRetry}
-					>
+					<button type="button" onClick={onFetchMore}>
 						다시 시도
 					</button>
 				</div>

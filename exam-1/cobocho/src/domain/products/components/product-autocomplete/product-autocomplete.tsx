@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
 	AutoComplete,
 	AutoCompleteItem,
@@ -34,6 +34,13 @@ export const ProductAutoComplete = ({
 	useEffect(() => {
 		setKeyword(value);
 	}, [value]);
+
+	const onChangeRef = useRef(onChange);
+	onChangeRef.current = onChange;
+
+	useEffect(() => {
+		onChangeRef.current(debouncedKeyword);
+	}, [debouncedKeyword]);
 
 	const { data } = useQuery({
 		...productsQuery.getAutoCompleteQueryOptions({ keyword: debouncedKeyword }),

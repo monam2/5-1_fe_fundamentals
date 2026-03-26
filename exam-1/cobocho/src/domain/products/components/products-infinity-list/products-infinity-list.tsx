@@ -35,14 +35,13 @@ export const ProductsInfinityList = ({
 
 	const products = data?.pages.flatMap((page) => page.products) ?? [];
 
-	const isBlank = !isLoading && products.length === 0;
+	const isBlank = !isError && !isLoading && products.length === 0;
 
 	return (
 		<InfinityScroll
 			onFetchMore={handleFetchMore}
 			error={isError}
-			onRetry={handleFetchMore}
-			disabled={!hasNextPage || isError}
+			disabled={!hasNextPage || isError || isBlank}
 			loading={isFetchingNextPage}
 		>
 			<div className="grid grid-cols-2 gap-4">

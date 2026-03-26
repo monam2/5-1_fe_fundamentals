@@ -88,15 +88,11 @@ describe('InfinityScroll', () => {
 		expect(screen.getByText('Loading...')).toBeInTheDocument();
 	});
 
-	it('error와 onRetry가 있으면 다시 시도 버튼을 렌더링한다', () => {
+	it('error가 있으면 다시 시도 버튼을 렌더링한다', () => {
 		mockIntersectionObserver(false);
 
 		render(
-			<InfinityScroll
-				onFetchMore={vi.fn()}
-				error
-				onRetry={vi.fn()}
-			>
+			<InfinityScroll onFetchMore={vi.fn()} error>
 				<p>아이템</p>
 			</InfinityScroll>,
 		);
@@ -104,30 +100,26 @@ describe('InfinityScroll', () => {
 		expect(screen.getByText('다시 시도')).toBeInTheDocument();
 	});
 
-	it('다시 시도 버튼을 클릭하면 onRetry를 호출한다', async () => {
+	it('다시 시도 버튼을 클릭하면 onFetchMore를 호출한다', async () => {
 		mockIntersectionObserver(false);
-		const onRetry = vi.fn();
+		const onFetchMore = vi.fn();
 
 		render(
-			<InfinityScroll
-				onFetchMore={vi.fn()}
-				error
-				onRetry={onRetry}
-			>
+			<InfinityScroll onFetchMore={onFetchMore} error>
 				<p>아이템</p>
 			</InfinityScroll>,
 		);
 
 		await userEvent.click(screen.getByText('다시 시도'));
 
-		expect(onRetry).toHaveBeenCalledTimes(1);
+		expect(onFetchMore).toHaveBeenCalledTimes(1);
 	});
 
 	it('error가 없으면 다시 시도 버튼을 렌더링하지 않는다', () => {
 		mockIntersectionObserver(false);
 
 		render(
-			<InfinityScroll onFetchMore={vi.fn()} onRetry={vi.fn()}>
+			<InfinityScroll onFetchMore={vi.fn()}>
 				<p>아이템</p>
 			</InfinityScroll>,
 		);
