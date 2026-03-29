@@ -32,9 +32,9 @@ function App() {
 
       <main className="mx-auto max-w-full px-4 md:px-6">
         {/* 데스크톱 검색 영역 */}
-        <search className="hidden mx-auto max-w-xl py-6 md:block">
+        <div className="hidden mx-auto max-w-xl py-6 md:block">
           <SearchBar />
-        </search>
+        </div>
 
         {/* 필터 영역 */}
         <nav

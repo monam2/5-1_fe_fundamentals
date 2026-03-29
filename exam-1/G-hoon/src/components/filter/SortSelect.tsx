@@ -13,6 +13,7 @@ function SortSelect() {
 
   return (
     <select
+      aria-label="정렬"
       className="cursor-pointer border-none bg-transparent text-xs font-medium text-gray-900 outline-none md:text-sm"
       value={sort}
       onChange={(e) => setSort(e.target.value as SortOption)}

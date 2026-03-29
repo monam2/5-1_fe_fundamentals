@@ -1,4 +1,5 @@
-import { useCallback, useDeferredValue, useEffect, useState } from 'react';
+import { debounce } from 'es-toolkit/function';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useProductFilters } from './useProductFilters';
 
 export function useSearchInput() {
@@ -6,7 +7,6 @@ export function useSearchInput() {
     useProductFilters();
   const [inputValue, setInputValue] = useState(urlKeyword);
 
-  const deferredKeyword = useDeferredValue(inputValue);
   const hasValue = inputValue.length > 0;
 
   // URL keyword가 외부에서 변경되면 (초기화 등) 동기화
@@ -14,23 +14,37 @@ export function useSearchInput() {
     setInputValue(urlKeyword);
   }, [urlKeyword]);
 
-  const submit = useCallback(
-    (value: string) => {
-      setInputValue(value);
-      setUrlKeyword(value);
-    },
+  const debouncedSetUrlKeyword = useMemo(
+    () => debounce((value: string) => setUrlKeyword(value || null), 300),
     [setUrlKeyword],
   );
 
+  useEffect(() => {
+    if (inputValue === urlKeyword) return;
+
+    debouncedSetUrlKeyword(inputValue);
+
+    return () => debouncedSetUrlKeyword.cancel();
+  }, [inputValue, urlKeyword, debouncedSetUrlKeyword]);
+
+  const submit = useCallback(
+    (value: string) => {
+      debouncedSetUrlKeyword.cancel();
+      setInputValue(value);
+      setUrlKeyword(value || null);
+    },
+    [debouncedSetUrlKeyword, setUrlKeyword],
+  );
+
   const clear = useCallback(() => {
+    debouncedSetUrlKeyword.cancel();
     setInputValue('');
-    setUrlKeyword('');
-  }, [setUrlKeyword]);
+    setUrlKeyword(null);
+  }, [debouncedSetUrlKeyword, setUrlKeyword]);
 
   return {
     inputValue,
     setInputValue,
-    deferredKeyword,
     hasValue,
     submit,
     clear,

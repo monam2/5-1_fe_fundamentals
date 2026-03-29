@@ -44,7 +44,7 @@ function SuggestionList({
   listboxId,
   onSelect,
 }: SuggestionListProps) {
-  const activeRef = useRef<HTMLDivElement>(null);
+  const activeRef = useRef<HTMLLIElement>(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: activeIndex 변경 시 스크롤 필요
   useEffect(() => {
@@ -54,17 +54,18 @@ function SuggestionList({
   if (suggestions.length === 0) return null;
 
   return (
-    <div
+    <ul
       id={listboxId}
-      className="absolute top-full right-0 left-0 z-20 max-h-64 overflow-y-auto border border-t-0 border-gray-200 bg-white shadow-sm"
-      role="listbox"
+      className="absolute top-full right-0 left-0 z-20 max-h-64 list-none overflow-y-auto border border-t-0 border-gray-200 bg-white p-0 shadow-sm"
       aria-label="검색어 추천"
     >
       {suggestions.map((suggestion, index) => (
-        <div
+        // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard navigation is handled by the combobox input
+        <li
           key={suggestion}
           ref={index === activeIndex ? activeRef : null}
           id={`${listboxId}-option-${index}`}
+          // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: li with role="option" is valid WAI-ARIA Combobox pattern
           role="option"
           tabIndex={-1}
           aria-selected={index === activeIndex}
@@ -72,12 +73,11 @@ function SuggestionList({
             index === activeIndex ? 'bg-gray-100' : 'hover:bg-gray-100'
           }`}
           onClick={() => onSelect(suggestion)}
-          onKeyDown={() => {}}
         >
           <HighlightedText text={suggestion} highlight={keyword} />
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
@@ -86,19 +86,13 @@ interface SearchBarProps {
 }
 
 function SearchBar({ placeholder = '상품을 검색해 보세요' }: SearchBarProps) {
-  const {
-    inputValue,
-    setInputValue,
-    deferredKeyword,
-    hasValue,
-    submit,
-    clear,
-  } = useSearchInput();
+  const { inputValue, setInputValue, hasValue, submit, clear } =
+    useSearchInput();
   const containerRef = useRef<HTMLElement>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const listboxId = useId();
 
-  const suggestions = useAutocomplete(deferredKeyword);
+  const suggestions = useAutocomplete(inputValue);
   const isListboxOpen = showSuggestions && suggestions.length > 0;
 
   const handleSelect = (value: string) => {
@@ -200,7 +194,7 @@ function SearchBar({ placeholder = '상품을 검색해 보세요' }: SearchBarP
         <SuggestionList
           suggestions={suggestions}
           activeIndex={activeIndex}
-          keyword={deferredKeyword}
+          keyword={inputValue}
           listboxId={listboxId}
           onSelect={handleSelect}
         />
