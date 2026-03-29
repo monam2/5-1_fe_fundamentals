@@ -17,7 +17,9 @@ interface GetProductsResponse {
   totalPages: number;
 }
 
-export async function getProducts(params: GetProductsParams = {}): Promise<GetProductsResponse> {
+export async function getProducts(
+  params: GetProductsParams = {},
+): Promise<GetProductsResponse> {
   const searchParams: Record<string, string> = {};
 
   if (params.categories && params.categories.length > 0) {

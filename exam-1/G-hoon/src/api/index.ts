@@ -1,2 +1,2 @@
-export { getAutocomplete } from './autocomplete';
-export { getProducts } from './products';
+export { getAutocomplete } from './getAutocomplete';
+export { getProducts } from './getProducts';

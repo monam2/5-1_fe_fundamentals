@@ -1,37 +1,41 @@
 {
-	"name": "exam-1-fe-fundamentals",
-	"private": true,
-	"version": "0.0.0",
-	"type": "module",
-	"scripts": {
-		"dev": "vite",
-		"build": "tsc -b && vite build",
-		"lint": "biome check .",
-		"lint:fix": "biome check --write .",
-		"format": "biome format --write .",
-		"preview": "vite preview"
-	},
-	"dependencies": {
-		"ky": "^1.14.3",
-		"lucide-react": "^1.7.0",
-		"react": "^19.2.4",
-		"react-dom": "^19.2.4"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^2.4.8",
-		"@tailwindcss/vite": "^4.2.2",
-		"@types/node": "^25.5.0",
-		"@types/react": "^19.2.14",
-		"@types/react-dom": "^19.2.3",
-		"@vitejs/plugin-react": "^6.0.1",
-		"msw": "^2.12.14",
-		"tailwindcss": "^4.2.2",
-		"typescript": "~5.9.3",
-		"vite": "^8.0.1"
-	},
-	"msw": {
-		"workerDirectory": [
-			"public"
-		]
-	}
+  "name": "exam-1-fe-fundamentals",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "es-toolkit": "^1.45.1",
+    "ky": "^1.14.3",
+    "lucide-react": "^1.7.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-error-boundary": "^6.1.1",
+    "react-router": "^7.13.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
+    "@tailwindcss/vite": "^4.2.2",
+    "@tanstack/react-query": "^5.95.2",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "msw": "^2.12.14",
+    "tailwindcss": "^4.2.2",
+    "typescript": "~5.9.3",
+    "vite": "^8.0.1"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
 }
