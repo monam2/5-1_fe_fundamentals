@@ -1,5 +1,4 @@
-import { debounce } from 'es-toolkit/function';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useProductFilters } from './useProductFilters';
 
 export function useSearchInput() {
@@ -14,33 +13,18 @@ export function useSearchInput() {
     setInputValue(urlKeyword);
   }, [urlKeyword]);
 
-  const debouncedSetUrlKeyword = useMemo(
-    () => debounce((value: string) => setUrlKeyword(value || null), 300),
-    [setUrlKeyword],
-  );
-
-  useEffect(() => {
-    if (inputValue === urlKeyword) return;
-
-    debouncedSetUrlKeyword(inputValue);
-
-    return () => debouncedSetUrlKeyword.cancel();
-  }, [inputValue, urlKeyword, debouncedSetUrlKeyword]);
-
   const submit = useCallback(
     (value: string) => {
-      debouncedSetUrlKeyword.cancel();
       setInputValue(value);
       setUrlKeyword(value || null);
     },
-    [debouncedSetUrlKeyword, setUrlKeyword],
+    [setUrlKeyword],
   );
 
   const clear = useCallback(() => {
-    debouncedSetUrlKeyword.cancel();
     setInputValue('');
     setUrlKeyword(null);
-  }, [debouncedSetUrlKeyword, setUrlKeyword]);
+  }, [setUrlKeyword]);
 
   return {
     inputValue,
