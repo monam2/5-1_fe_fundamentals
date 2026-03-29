@@ -33,6 +33,14 @@ const ProductList = () => {
   const { filters } = useProductFilters();
   const { data } = useProducts(filters);
 
+  if (data.products.length === 0) {
+    return (
+      <div className="mt-6 flex items-center justify-center py-20 text-gray-400">
+        찾으시는 상품이 없습니다.
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6">
       <div className="grid grid-cols-4 gap-4">
