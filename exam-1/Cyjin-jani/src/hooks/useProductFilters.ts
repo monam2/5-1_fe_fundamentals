@@ -1,6 +1,6 @@
-import { useTransition } from "react";
-import { useSearchParams } from "react-router-dom";
-import type { Category, SortOption } from "@/types/product";
+import { useTransition } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import type { Category, SortOption } from '@/types/product';
 
 interface ProductFiltersReturn {
   filters: {
@@ -9,64 +9,87 @@ interface ProductFiltersReturn {
     sort: SortOption;
   };
   isPending: boolean;
+  hasActiveFilters: boolean;
   setKeyword: (keyword: string) => void;
   toggleCategory: (category: Category) => void;
   setSort: (sort: SortOption) => void;
+  resetFilters: () => void;
 }
 
 const DEFAULT_SORT = 'newest';
 
 export const useProductFilters = (): ProductFiltersReturn => {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [isPending, startTransition] = useTransition();
-  
-    const filters = {
-      categories: searchParams.getAll('category') as Category[],
-      keyword: searchParams.get('keyword') ?? '',
-      sort: searchParams.get('sort') as SortOption ?? DEFAULT_SORT,
-    };
-  
-    const setKeyword = (keyword: string) => {
-      startTransition(() => {
-        setSearchParams((params) => {
-          const trimmed = keyword.trim();
-          if (trimmed) {
-            params.set('keyword', trimmed);
-          } else {
-            params.delete('keyword');
-          }
-          return params;
-        });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  const filters = {
+    categories: searchParams.getAll('category') as Category[],
+    keyword: searchParams.get('keyword') ?? '',
+    sort: (searchParams.get('sort') as SortOption) ?? DEFAULT_SORT,
+  };
+
+  const hasActiveFilters =
+    filters.categories.length > 0 ||
+    filters.keyword !== '' ||
+    filters.sort !== DEFAULT_SORT;
+
+  const setKeyword = (keyword: string) => {
+    startTransition(() => {
+      setSearchParams((params) => {
+        const trimmed = keyword.trim();
+        if (trimmed) {
+          params.set('keyword', trimmed);
+        } else {
+          params.delete('keyword');
+        }
+        return params;
       });
-    };
-  
-    const toggleCategory = (category: Category) => {
-      startTransition(() => {
-        setSearchParams((params) => {
-          const current = params.getAll('category');
-          
-          if (current.includes(category)) {
-            params.delete('category');
-            current.filter((cur) => cur !== category).forEach((c) => {
+    });
+  };
+
+  const toggleCategory = (category: Category) => {
+    startTransition(() => {
+      setSearchParams((params) => {
+        const current = params.getAll('category');
+
+        if (current.includes(category)) {
+          params.delete('category');
+          current
+            .filter((cur) => cur !== category)
+            .forEach((c) => {
               params.append('category', c);
             });
-          } else {
-            params.append('category', category);
-          }
+        } else {
+          params.append('category', category);
+        }
 
-          return params;
-        });
+        return params;
       });
-    };
-
-    const setSort = (sort: SortOption) => {
-      startTransition(() => {
-        setSearchParams((params) => {
-          params.set('sort', sort);
-          return params;
-        });
-      });
-    };
-  
-    return { filters, isPending, setKeyword, toggleCategory, setSort };
+    });
   };
+
+  const setSort = (sort: SortOption) => {
+    startTransition(() => {
+      setSearchParams((params) => {
+        params.set('sort', sort);
+        return params;
+      });
+    });
+  };
+
+  const resetFilters = () => {
+    startTransition(() => {
+      setSearchParams(new URLSearchParams());
+    });
+  };
+
+  return {
+    filters,
+    isPending,
+    hasActiveFilters,
+    setKeyword,
+    toggleCategory,
+    setSort,
+    resetFilters,
+  };
+};

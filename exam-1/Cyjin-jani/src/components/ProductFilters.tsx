@@ -1,7 +1,9 @@
-import { type ChangeEvent, useCallback } from 'react';
+import { RotateCcw } from 'lucide-react';
+import { type ChangeEvent, useCallback, useRef } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useProductFilters } from '@/hooks/useProductFilters';
 import type { Category, SortOption } from '@/types/product';
+import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
 import { Input } from './ui/input';
 import {
@@ -22,10 +24,17 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ];
 
 export const ProductFilters = () => {
-  const { filters, isPending, setKeyword, toggleCategory, setSort } =
-    useProductFilters();
-  console.log('🚀 ~ ProductFilters ~ isPending:', isPending);
+  const {
+    filters,
+    isPending,
+    hasActiveFilters,
+    setKeyword,
+    toggleCategory,
+    setSort,
+    resetFilters,
+  } = useProductFilters();
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const debouncedSetKeyword = useDebounce(setKeyword, 500);
 
   const handleFilterChange = (category: Category) => {
@@ -39,15 +48,34 @@ export const ProductFilters = () => {
     [debouncedSetKeyword],
   );
 
+  const handleReset = () => {
+    resetFilters();
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex w-full justify-center">
-        <Input
-          className="w-full max-w-[360px]"
-          placeholder="keyword 검색"
-          defaultValue={filters.keyword}
-          onChange={handleKeywordChange}
-        />
+      <div className="relative flex w-full items-center">
+        <div className="mx-auto w-full max-w-[360px]">
+          <Input
+            ref={inputRef}
+            className="w-full"
+            placeholder="keyword 검색"
+            defaultValue={filters.keyword}
+            onChange={handleKeywordChange}
+          />
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={!hasActiveFilters}
+          onClick={handleReset}
+          className="absolute right-0 gap-1.5"
+        >
+          <RotateCcw />
+          초기화
+        </Button>
       </div>
       <div className="flex items-center justify-between">
         <div
