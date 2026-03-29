@@ -47,7 +47,7 @@ export const ToggleGroup = (props: ToggleGroupProps) => {
 						const p = props as ToggleGroupSingleProps;
 						p.onChange(p.value === v ? null : v);
 					},
-				}
+			  }
 			: {
 					type,
 					isSelected: (v) =>
@@ -59,13 +59,11 @@ export const ToggleGroup = (props: ToggleGroupProps) => {
 							: [...p.value, v];
 						p.onChange(next);
 					},
-				};
+			  };
 
 	return (
 		<ToggleGroupContext.Provider value={contextValue}>
-			<fieldset className={cn('flex gap-1', className)}>
-				{children}
-			</fieldset>
+			<fieldset className={cn('flex gap-1', className)}>{children}</fieldset>
 		</ToggleGroupContext.Provider>
 	);
 };

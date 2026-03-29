@@ -1,12 +1,13 @@
 import type { HTMLAttributes } from 'react';
 import { cn } from '@/libs/cn';
+import { type Gap, gapMap } from './layout.styles';
 
 interface FlexProps extends HTMLAttributes<HTMLDivElement> {
 	direction?: 'row' | 'column';
 	align?: 'start' | 'center' | 'end' | 'stretch' | 'baseline';
 	justify?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
 	wrap?: boolean;
-	gap?: number;
+	gap?: Gap;
 }
 
 const alignMap = {
@@ -43,7 +44,7 @@ export const Flex = ({
 				align && alignMap[align],
 				justify && justifyMap[justify],
 				wrap && 'flex-wrap',
-				gap !== undefined && `gap-${gap}`,
+				gap !== undefined && gapMap[gap],
 				className,
 			)}
 			{...rest}
@@ -55,12 +56,25 @@ export const HStack = ({
 	className,
 	...rest
 }: Omit<FlexProps, 'direction'>) => {
-	return <Flex direction="row" align="center" className={className} {...rest} />;
+	return (
+		<Flex
+			direction="row"
+			align="center"
+			className={className}
+			{...rest}
+		/>
+	);
 };
 
 export const VStack = ({
 	className,
 	...rest
 }: Omit<FlexProps, 'direction'>) => {
-	return <Flex direction="column" className={className} {...rest} />;
+	return (
+		<Flex
+			direction="column"
+			className={className}
+			{...rest}
+		/>
+	);
 };
