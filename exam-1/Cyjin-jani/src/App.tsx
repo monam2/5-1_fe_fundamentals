@@ -1,12 +1,12 @@
+import './styles/App.css';
+
+import { Products } from './components/products/Products';
+
 function App() {
   return (
-    <div>
+    <div className="w-full h-dvh bg-white mx-auto px-[80px]">
       <h1>🧪 Exam 1: 다중 필터 상품 목록</h1>
-      <p>여기서부터 시작하세요! 이 파일을 자유롭게 수정해주세요.</p>
-      <p>
-        <code>pnpm dev</code> 실행 후 <code>GET /api/products</code> 로 API
-        호출이 가능합니다.
-      </p>
+      <Products />
     </div>
   );
 }
