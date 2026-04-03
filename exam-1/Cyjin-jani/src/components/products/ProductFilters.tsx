@@ -1,4 +1,5 @@
 import { RotateCcw } from 'lucide-react';
+import { PRODUCT_CATEGORIES } from '@/constants/productCategories';
 import type { Category, SortOption } from '@/types/product';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
@@ -11,8 +12,6 @@ import {
 } from '../ui/select';
 import { useProductFilterContext } from './ProductFilterContext';
 import { SearchInput } from './SearchInput';
-
-const categories: Category[] = ['accessories', 'bottoms', 'shoes', 'tops'];
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'newest', label: '최신순' },
@@ -39,7 +38,7 @@ export const ProductFilters = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="relative flex w-full items-center">
-        <div className="mx-auto w-full max-w-[360px]">
+        <div className="mx-auto w-full max-w-[440px]">
           <SearchInput defaultValue={filters.keyword} onSearch={setKeyword} />
         </div>
         <Button
@@ -58,7 +57,7 @@ export const ProductFilters = () => {
         <div
           className={`flex items-center gap-[12px] transition-opacity ${isPending ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}
         >
-          {categories.map((category) => (
+          {PRODUCT_CATEGORIES.map((category) => (
             <label
               key={category}
               htmlFor={category}

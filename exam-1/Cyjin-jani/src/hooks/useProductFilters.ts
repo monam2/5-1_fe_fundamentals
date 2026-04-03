@@ -1,13 +1,11 @@
 import { useTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { PRODUCT_CATEGORIES } from '@/constants/productCategories';
 import type { Category, SortOption } from '@/types/product';
-
-/** URL·쿼리키가 선택 순서에 따라 달라지지 않도록 고정 순서 유지 */
-const CATEGORY_ORDER: Category[] = ['accessories', 'bottoms', 'shoes', 'tops'];
 
 const sortCategories = (categories: Category[]): Category[] =>
   [...categories].sort(
-    (a, b) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b),
+    (a, b) => PRODUCT_CATEGORIES.indexOf(a) - PRODUCT_CATEGORIES.indexOf(b),
   );
 
 export interface ProductFiltersReturn {
