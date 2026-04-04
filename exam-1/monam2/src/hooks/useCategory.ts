@@ -1,29 +1,25 @@
-import { useState, useEffect } from "react";
 import { useRouteParams } from "@/hooks";
+import { type Category, isCategory } from "@/types";
 
 export default function useCategory() {
   const { updateQuery, currentQuery } = useRouteParams();
-
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    () => currentQuery.categories?.split(",").filter(Boolean) ?? [],
-  );
-
-  useEffect(() => {
-    setSelectedCategories(
-      currentQuery.categories?.split(",").filter(Boolean) ?? [],
-    );
-  }, [currentQuery.categories]);
+  const selectedCategories =
+    currentQuery.categories?.split(",").filter(isCategory) ?? [];
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
-    const nextCategories = checked
-      ? [...new Set([...selectedCategories, value])]
-      : selectedCategories.filter((category) => category !== value);
+    const nextCategory = isCategory(value) ? value : undefined;
 
-    setSelectedCategories(nextCategories);
+    if (!nextCategory) {
+      return;
+    }
+
+    const nextCategories = checked
+      ? [...new Set([...selectedCategories, nextCategory])]
+      : selectedCategories.filter((category) => category !== nextCategory);
 
     updateQuery({
-      categories: nextCategories.join(","),
+      categories: serializeCategories(nextCategories),
     });
   };
 
@@ -31,4 +27,8 @@ export default function useCategory() {
     selectedCategories,
     onChange,
   };
+}
+
+function serializeCategories(categories: Category[]) {
+  return categories.length > 0 ? categories.join(",") : undefined;
 }

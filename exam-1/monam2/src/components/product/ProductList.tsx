@@ -1,10 +1,9 @@
-import { useProductList, useRouteParams } from "@/hooks";
 import { ImpressionArea, ProductCard, Spinner } from "@/components";
-
 import { DEFAULT_SORT } from "@/constants";
+import { useProductList, useRouteParams } from "@/hooks";
 
 const SCROLL_THRESHOLD = 0.2;
-const SIZE = 5;
+const PAGE_SIZE = 5;
 
 export default function ProductList() {
   const { currentQuery } = useRouteParams();
@@ -12,20 +11,15 @@ export default function ProductList() {
   const {
     data: products,
     hasNextPage,
-    fetchNextPage,
+    isFetchingNextPage,
+    loadMore,
   } = useProductList({
     keyword: currentQuery.search,
     categories: currentQuery.categories,
     sort: currentQuery.sort ?? DEFAULT_SORT,
-    size: SIZE,
-    page: 0,
+    size: PAGE_SIZE,
   });
-
-  const fetchMoreData = () => {
-    if (hasNextPage) {
-      fetchNextPage();
-    }
-  };
+  const sentinelDisabled = !hasNextPage || isFetchingNextPage;
 
   return (
     <>
@@ -42,14 +36,28 @@ export default function ProductList() {
       </div>
       <ImpressionArea
         areaThreshold={SCROLL_THRESHOLD}
-        onImpressionStart={fetchMoreData}
+        disabled={sentinelDisabled}
+        onImpressionStart={loadMore}
       >
-        <EndOfList hasMoreData={hasNextPage} />
+        <EndOfList
+          hasMoreData={Boolean(hasNextPage)}
+          isFetchingMore={isFetchingNextPage}
+        />
       </ImpressionArea>
     </>
   );
 }
 
-function EndOfList({ hasMoreData }: { hasMoreData: boolean }) {
+function EndOfList({
+  hasMoreData,
+  isFetchingMore,
+}: {
+  hasMoreData: boolean;
+  isFetchingMore: boolean;
+}) {
+  if (isFetchingMore) {
+    return <Spinner />;
+  }
+
   return hasMoreData ? <Spinner /> : <p>더 이상 데이터가 없습니다.</p>;
 }

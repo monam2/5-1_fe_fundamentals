@@ -1,60 +1,79 @@
-import { css } from "@emotion/react";
+import { css } from '@emotion/react';
 
 import {
-  Flex,
-  Select,
+  AsyncBoundary,
+  Autocomplete,
   Button,
   Checkbox,
   Container,
+  Flex,
+  Layout,
   ProductList,
-  Autocomplete,
-  AsyncBoundary,
   ProductSkeleton,
-} from "@/components";
-import { CATEGORY, DEFAULT_SORT, SORT } from "@/constants";
-import { useCategory, useRouteParams, useSearch } from "@/hooks";
+  Section,
+  Select,
+} from '@/components';
+import { CATEGORY_OPTIONS, DEFAULT_SORT, SORT_OPTIONS } from '@/constants';
+import { useCategory, useRouteParams, useSearch } from '@/hooks';
+import { isSortOption } from '@/types';
 
 export default function App() {
   return (
-    <Container>
-      <App.Header title="SIPE 마켓" subtitle="구매할 상품을 골라보세요." />
-      <ProductSearchBar />
-      <Flex
-        css={css`
-          width: 100%;
-          align-items: stretch;
-        `}
-      >
-        <ProductCategory />
-        <ProductSort />
-      </Flex>
-      <AsyncBoundary suspenseFallback={<ProductSkeleton />}>
-        <ProductList />
-      </AsyncBoundary>
-    </Container>
+    <Layout>
+      <Container>
+        <Section>
+          <PageHeader title="SIPE 마켓" subtitle="구매할 상품을 골라보세요." />
+          <ProductSearchBar />
+          <Flex
+            align="stretch"
+            css={css`
+              width: 100%;
+            `}
+          >
+            <ProductCategory />
+            <ProductSort />
+          </Flex>
+          <AsyncBoundary suspenseFallback={<ProductSkeleton />}>
+            <ProductList />
+          </AsyncBoundary>
+        </Section>
+      </Container>
+    </Layout>
   );
 }
 
 function ProductSearchBar() {
-  const { keyword, options, onChange, search, reset } = useSearch();
+  const { resetQuery } = useRouteParams();
+  const { keyword, options, onChange, search } = useSearch();
 
   return (
-    <Flex direction="row" gap="0.5rem">
-      <Autocomplete
-        value={keyword}
-        onChange={onChange}
-        onSelect={(option) => search(option.value)}
-        options={options}
+    <Flex
+      direction="row"
+      align="start"
+      gap={8}
+      wrap
+      css={css`
+        width: 100%;
+      `}
+    >
+      <div
+        css={css`
+          flex: 1;
+          min-width: min(18rem, 100%);
+        `}
       >
-        <Autocomplete.Input
+        <Autocomplete
+          value={keyword}
+          onChange={onChange}
+          onSelect={(option) => search(option.value)}
+          options={options}
           aria-label="상품명 검색"
           placeholder="상품명을 입력하세요."
         />
-        <Autocomplete.List />
-      </Autocomplete>
+      </div>
       <Button onClick={() => search()}>검색</Button>
-      <Button onClick={reset} variant="secondary">
-        초기화
+      <Button onClick={resetQuery} variant="secondary">
+        전체 초기화
       </Button>
     </Flex>
   );
@@ -78,12 +97,12 @@ function ProductCategory() {
         }
       `}
     >
-      {Object.entries(CATEGORY).map(([key, value]) => (
+      {CATEGORY_OPTIONS.map(({ value, label }) => (
         <Checkbox
-          key={key}
-          label={value}
-          value={key}
-          checked={selectedCategories.includes(key)}
+          key={value}
+          label={label}
+          value={value}
+          checked={selectedCategories.includes(value)}
           onChange={onChange}
         />
       ))}
@@ -97,36 +116,33 @@ function ProductSort() {
 
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;
+
+    if (!isSortOption(value)) {
+      return;
+    }
+
     updateQuery({
       sort: value,
     });
   };
 
   return (
-    <Select
-      options={[
-        ...Object.entries(SORT).map(([key, value]) => ({
-          label: value,
-          value: key,
-        })),
-      ]}
-      value={selectedSort}
-      onChange={onChange}
-    />
+    <Select options={SORT_OPTIONS} value={selectedSort} onChange={onChange} />
   );
 }
 
-App.Header = function Header({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
+function PageHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div>
+    <header
+      css={css`
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+      `}
+    >
       <h1>{title}</h1>
       {subtitle && <p>{subtitle}</p>}
-    </div>
+    </header>
   );
-};
+}

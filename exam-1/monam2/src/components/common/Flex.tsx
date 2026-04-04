@@ -3,19 +3,26 @@ import { css, type SerializedStyles } from "@emotion/react";
 interface FlexProps {
   children: React.ReactNode;
   direction?: "row" | "column";
-  justify?: "start" | "center" | "end";
-  align?: "start" | "center" | "end";
-  gap?: string;
+  justify?: "start" | "center" | "end" | "stretch";
+  align?: "start" | "center" | "end" | "stretch";
+  gap?: number;
   wrap?: boolean;
   css?: SerializedStyles;
 }
+
+const alignmentMap = {
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+  stretch: "stretch",
+} as const;
 
 export default function Flex({
   children,
   direction = "row",
   justify = "start",
   align = "center",
-  gap = "1rem",
+  gap = 16,
   wrap = false,
   css: cssProp,
 }: FlexProps) {
@@ -27,15 +34,19 @@ export default function Flex({
 }
 const flexStyle = (
   direction: "row" | "column",
-  justify: "start" | "center" | "end",
-  align: "start" | "center" | "end",
-  gap: string,
+  justify: "start" | "center" | "end" | "stretch",
+  align: "start" | "center" | "end" | "stretch",
+  gap: number,
   wrap: boolean,
 ) => css`
   display: flex;
-  gap: ${gap};
-  align-items: ${align};
-  justify-content: ${justify};
+  gap: ${toRem(gap)};
+  align-items: ${alignmentMap[align]};
+  justify-content: ${alignmentMap[justify]};
   flex-direction: ${direction};
   flex-wrap: ${wrap ? "wrap" : "nowrap"};
 `;
+
+function toRem(px: number) {
+  return `${px / 16}rem`;
+}

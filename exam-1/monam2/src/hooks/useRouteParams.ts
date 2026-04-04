@@ -1,23 +1,53 @@
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { isSortOption, type SortOption } from "@/types";
+
+export interface ProductQueryState {
+  search?: string;
+  categories?: string;
+  sort?: SortOption;
+}
+
+type ProductQueryPatch = {
+  [Key in keyof ProductQueryState]?: ProductQueryState[Key] | undefined;
+};
+
+function normalizeQueryValue(value: string | null) {
+  const normalizedValue = value?.trim();
+  return normalizedValue ? normalizedValue : undefined;
+}
+
+function readProductQuery(searchParams: URLSearchParams): ProductQueryState {
+  const rawSort = searchParams.get("sort");
+
+  return {
+    search: normalizeQueryValue(searchParams.get("search")),
+    categories: normalizeQueryValue(searchParams.get("categories")),
+    sort: isSortOption(rawSort) ? rawSort : undefined,
+  };
+}
 
 export default function useRouteParams() {
-  const router = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const currentQuery = readProductQuery(searchParams);
 
-  const currentQuery = Object.fromEntries(searchParams.entries());
+  const updateQuery = (queries: ProductQueryPatch) => {
+    const nextParams = new URLSearchParams(searchParams);
 
-  const updateQuery = (queries: Record<string, string>) => {
-    const newParams = new URLSearchParams(searchParams);
+    for (const [key, value] of Object.entries(queries) as Array<
+      [keyof ProductQueryState, string | undefined]
+    >) {
+      const normalizedValue =
+        typeof value === "string" ? value.trim() : (value ?? undefined);
 
-    Object.entries(queries).forEach(([key, value]) => {
-      if (!value) {
-        newParams.delete(key);
-      } else {
-        newParams.set(key, value);
+      if (!normalizedValue) {
+        nextParams.delete(key);
+        continue;
       }
-    });
 
-    setSearchParams(newParams);
+      nextParams.set(key, normalizedValue);
+    }
+
+    setSearchParams(nextParams);
   };
 
   const resetQuery = () => {
@@ -25,8 +55,6 @@ export default function useRouteParams() {
   };
 
   return {
-    router,
-    searchParams,
     currentQuery,
     updateQuery,
     resetQuery,

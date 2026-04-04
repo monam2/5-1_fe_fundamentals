@@ -28,10 +28,11 @@ export default function Button({
         sizeStyles[size],
         fullWidth && fullWidthStyle,
       ]}
+      aria-busy={isLoading}
       disabled={disabled || isLoading}
       {...rest}
     >
-      {isLoading ? <span css={spinnerStyle} aria-label="로딩 중" /> : children}
+      {isLoading ? <span css={spinnerStyle} aria-hidden="true" /> : children}
     </button>
   );
 }

@@ -1,18 +1,12 @@
-import { css } from '@emotion/react';
+import { css } from "@emotion/react";
 import {
   type ComponentPropsWithoutRef,
-  createContext,
-  type Dispatch,
   type KeyboardEvent,
-  type ReactNode,
-  type RefObject,
-  type SetStateAction,
-  useContext,
   useEffect,
   useId,
   useRef,
   useState,
-} from 'react';
+} from "react";
 
 export interface AutocompleteOption {
   value: string;
@@ -20,55 +14,37 @@ export interface AutocompleteOption {
 }
 
 interface AutocompleteProps {
-  children: ReactNode;
   options: AutocompleteOption[];
   value: string;
   onChange: (value: string) => void;
   onSelect?: (option: AutocompleteOption) => void;
+  emptyMessage?: string;
 }
 
-interface AutocompleteContextValue {
-  activeIndex: number;
-  inputId: string;
-  inputRef: RefObject<HTMLInputElement | null>;
-  isOpen: boolean;
-  listId: string;
-  onChange: (value: string) => void;
-  options: AutocompleteOption[];
-  selectOption: (option: AutocompleteOption) => void;
-  setActiveIndex: Dispatch<SetStateAction<number>>;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
-  value: string;
-}
+type AutocompleteInputProps = Omit<
+  ComponentPropsWithoutRef<"input">,
+  "onChange" | "onSelect" | "type" | "value"
+>;
 
-const AutocompleteContext = createContext<AutocompleteContextValue | null>(
-  null,
-);
-
-function useAutocompleteContext() {
-  const context = useContext(AutocompleteContext);
-
-  if (!context) {
-    throw new Error('Autocomplete compound components must be used together.');
-  }
-
-  return context;
-}
-
-function AutocompleteRoot({
-  children,
+export default function Autocomplete({
   options,
   value,
   onChange,
   onSelect,
-}: AutocompleteProps) {
+  emptyMessage = "검색 결과가 없습니다.",
+  onFocus,
+  onKeyDown,
+  ...inputProps
+}: AutocompleteProps & AutocompleteInputProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const inputId = useId();
   const listId = useId();
-
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const normalizedValue = value.trim();
+  const shouldShowList = isOpen && normalizedValue.length > 0;
+  const activeOptionId =
+    activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -81,18 +57,13 @@ function AutocompleteRoot({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
-    if (!value) {
+    if (!normalizedValue) {
       setIsOpen(false);
-      setActiveIndex(-1);
-      return;
-    }
-
-    if (options.length === 0) {
       setActiveIndex(-1);
       return;
     }
@@ -101,63 +72,26 @@ function AutocompleteRoot({
       setIsOpen(true);
     }
 
+    if (options.length === 0) {
+      setActiveIndex(-1);
+      return;
+    }
+
     if (activeIndex >= options.length) {
       setActiveIndex(options.length - 1);
     }
-  }, [activeIndex, options.length, value]);
+  }, [activeIndex, normalizedValue, options.length]);
 
-  const selectOption = (option: AutocompleteOption) => {
-    onChange(option.value);
-    onSelect?.(option);
+  const closeList = () => {
     setIsOpen(false);
     setActiveIndex(-1);
   };
 
-  return (
-    <AutocompleteContext.Provider
-      value={{
-        activeIndex,
-        inputId,
-        inputRef,
-        isOpen,
-        listId,
-        onChange,
-        options,
-        selectOption,
-        setActiveIndex,
-        setIsOpen,
-        value,
-      }}
-    >
-      <div ref={rootRef} css={rootStyle}>
-        {children}
-      </div>
-    </AutocompleteContext.Provider>
-  );
-}
-
-type AutocompleteInputProps = Omit<
-  ComponentPropsWithoutRef<'input'>,
-  'value' | 'onChange'
->;
-
-function AutocompleteInput({
-  onFocus,
-  onKeyDown,
-  ...props
-}: AutocompleteInputProps) {
-  const {
-    activeIndex,
-    inputId,
-    inputRef,
-    isOpen,
-    onChange,
-    options,
-    selectOption,
-    setActiveIndex,
-    setIsOpen,
-    value,
-  } = useAutocompleteContext();
+  const selectOption = (option: AutocompleteOption) => {
+    onChange(option.value);
+    onSelect?.(option);
+    closeList();
+  };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(event);
@@ -167,7 +101,7 @@ function AutocompleteInput({
     }
 
     if (!isOpen) {
-      if (event.key === 'ArrowDown' && options.length > 0) {
+      if (event.key === "ArrowDown" && options.length > 0) {
         event.preventDefault();
         setIsOpen(true);
         setActiveIndex(0);
@@ -176,162 +110,147 @@ function AutocompleteInput({
     }
 
     switch (event.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         event.preventDefault();
         setActiveIndex((previousIndex) =>
           Math.min(previousIndex + 1, options.length - 1),
         );
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         event.preventDefault();
         setActiveIndex((previousIndex) => Math.max(previousIndex - 1, 0));
         break;
-      case 'Enter':
+      case "Enter":
         if (activeIndex >= 0 && options[activeIndex]) {
           event.preventDefault();
           selectOption(options[activeIndex]);
         }
         break;
-      case 'Escape':
-      case 'Tab':
-        setIsOpen(false);
-        setActiveIndex(-1);
+      case "Escape":
+      case "Tab":
+        closeList();
         break;
     }
   };
 
   return (
-    <input
-      {...props}
-      ref={inputRef}
-      id={inputId}
-      type="text"
-      autoComplete="off"
-      css={inputStyle}
-      value={value}
-      onChange={(event) => {
-        onChange(event.target.value);
-        setIsOpen(true);
-        setActiveIndex(-1);
-      }}
-      onFocus={(event) => {
-        onFocus?.(event);
-        if (options.length > 0) {
+    <div ref={rootRef} css={rootStyle}>
+      <input
+        {...inputProps}
+        ref={inputRef}
+        type="text"
+        role="combobox"
+        autoComplete="off"
+        css={inputStyle}
+        value={value}
+        aria-autocomplete="list"
+        aria-expanded={shouldShowList}
+        aria-controls={shouldShowList ? listId : undefined}
+        aria-activedescendant={shouldShowList ? activeOptionId : undefined}
+        onChange={(event) => {
+          onChange(event.target.value);
           setIsOpen(true);
-        }
-      }}
-      onKeyDown={handleKeyDown}
-    />
-  );
-}
+          setActiveIndex(-1);
+        }}
+        onFocus={(event) => {
+          onFocus?.(event);
 
-interface AutocompleteListProps {
-  emptyMessage?: string;
-}
-
-function AutocompleteList({
-  emptyMessage = '검색 결과가 없습니다.',
-}: AutocompleteListProps) {
-  const { activeIndex, isOpen, listId, options, selectOption, setActiveIndex } =
-    useAutocompleteContext();
-
-  if (!isOpen) {
-    return null;
-  }
-
-  return (
-    <div id={listId} css={listStyle}>
-      {options.length === 0 ? (
-        <div css={emptyStyle}>{emptyMessage}</div>
-      ) : (
-        options.map((option, index) => (
-          <button
-            type="button"
-            key={option.value}
-            id={`${listId}-option-${index}`}
-            tabIndex={-1}
-            css={[itemStyle, activeIndex === index && activeItemStyle]}
-            onMouseEnter={() => setActiveIndex(index)}
-            onMouseDown={(event) => {
-              event.preventDefault();
-              selectOption(option);
-            }}
-          >
-            {option.label}
-          </button>
-        ))
+          if (normalizedValue) {
+            setIsOpen(true);
+          }
+        }}
+        onKeyDown={handleKeyDown}
+      />
+      {shouldShowList && (
+        <div id={listId} role="listbox" css={listStyle}>
+          {options.length === 0 ? (
+            <div css={emptyStyle}>{emptyMessage}</div>
+          ) : (
+            options.map((option, index) => (
+              <button
+                type="button"
+                key={option.value}
+                id={`${listId}-option-${index}`}
+                role="option"
+                tabIndex={-1}
+                aria-selected={activeIndex === index}
+                css={[itemStyle, activeIndex === index && activeItemStyle]}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  selectOption(option);
+                }}
+              >
+                {option.label}
+              </button>
+            ))
+          )}
+        </div>
       )}
     </div>
   );
 }
 
-const Autocomplete = Object.assign(AutocompleteRoot, {
-  Input: AutocompleteInput,
-  List: AutocompleteList,
-});
-
-export default Autocomplete;
-
 const rootStyle = css({
-  position: 'relative',
-  width: '100%',
+  position: "relative",
+  width: "100%",
 });
 
 const inputStyle = css({
-  width: '100%',
-  height: '40px',
-  padding: '0 0.875rem',
-  fontSize: '0.9375rem',
-  color: '#111827',
-  backgroundColor: '#ffffff',
-  border: '1.5px solid #d1d5db',
-  borderRadius: '8px',
-  outline: 'none',
-  transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+  width: "100%",
+  height: "40px",
+  padding: "0 0.875rem",
+  fontSize: "0.9375rem",
+  color: "#111827",
+  backgroundColor: "#ffffff",
+  border: "1.5px solid #d1d5db",
+  borderRadius: "8px",
+  outline: "none",
+  transition: "border-color 0.15s ease, box-shadow 0.15s ease",
 
-  '&::placeholder': {
-    color: '#9ca3af',
+  "&::placeholder": {
+    color: "#9ca3af",
   },
 
-  '&:focus': {
-    borderColor: '#f97316',
-    boxShadow: '0 0 0 3px rgba(249, 115, 22, 0.18)',
+  "&:focus": {
+    borderColor: "#f97316",
+    boxShadow: "0 0 0 3px rgba(249, 115, 22, 0.18)",
   },
 });
 
 const listStyle = css({
-  position: 'absolute',
-  top: 'calc(100% + 4px)',
+  position: "absolute",
+  top: "calc(100% + 4px)",
   left: 0,
   right: 0,
   zIndex: 10,
-  padding: '0.25rem',
+  padding: "0.25rem",
   margin: 0,
-  listStyle: 'none',
-  backgroundColor: '#ffffff',
-  border: '1px solid #e5e7eb',
-  borderRadius: '10px',
-  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
+  listStyle: "none",
+  backgroundColor: "#ffffff",
+  border: "1px solid #e5e7eb",
+  borderRadius: "10px",
+  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.1)",
 });
 
 const itemStyle = css({
-  display: 'block',
-  width: '100%',
-  padding: '0.5rem 0.75rem',
-  color: 'inherit',
-  textAlign: 'left',
-  background: 'transparent',
-  border: 'none',
-  borderRadius: '6px',
-  cursor: 'pointer',
+  display: "block",
+  width: "100%",
+  padding: "0.5rem 0.75rem",
+  color: "inherit",
+  textAlign: "left",
+  background: "transparent",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
 });
 
 const activeItemStyle = css({
-  backgroundColor: '#fff7ed',
-  color: '#c2410c',
+  backgroundColor: "#fff7ed",
+  color: "#c2410c",
 });
 
 const emptyStyle = css({
-  padding: '0.5rem 0.75rem',
-  color: '#9ca3af',
+  padding: "0.5rem 0.75rem",
+  color: "#9ca3af",
 });

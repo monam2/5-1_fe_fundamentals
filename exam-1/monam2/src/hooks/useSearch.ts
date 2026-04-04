@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
-import { useRouteParams, useDebounce, useAutoComplete } from "@/hooks";
+import { useEffect, useState } from "react";
+import { useAutoComplete, useDebounce, useRouteParams } from "@/hooks";
 
 export default function useSearch() {
-  const { currentQuery, updateQuery, resetQuery } = useRouteParams();
+  const { currentQuery, updateQuery } = useRouteParams();
 
-  const [keyword, setKeyword] = useState<string>(currentQuery.search ?? "");
-  const debouncedKeyword = useDebounce(keyword, 500);
+  const [keyword, setKeyword] = useState(currentQuery.search ?? "");
+  const debouncedKeyword = useDebounce(keyword.trim(), 500);
 
   const { data: autocompletedData } = useAutoComplete({
     keyword: debouncedKeyword,
@@ -30,13 +30,8 @@ export default function useSearch() {
 
     setKeyword(trimmedKeyword);
     updateQuery({
-      search: trimmedKeyword,
+      search: trimmedKeyword || undefined,
     });
-  };
-
-  const reset = () => {
-    setKeyword("");
-    resetQuery();
   };
 
   return {
@@ -44,6 +39,5 @@ export default function useSearch() {
     options,
     onChange,
     search,
-    reset,
   };
 }

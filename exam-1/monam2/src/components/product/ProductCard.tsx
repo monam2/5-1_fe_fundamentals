@@ -1,8 +1,7 @@
 import { css } from "@emotion/react";
-import { formatCurrency } from "@/utils";
 import { Button, Card } from "@/components";
-
 import type { Product } from "@/types/product";
+import { formatKoreanCurrency } from "@/utils";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
@@ -12,7 +11,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <div css={productNameStyle}>{product.name}</div>
         <div>{product.category}</div>
         <div>⭐ {product.rating}</div>
-        <div>￦{formatCurrency(product.price)}</div>
+        <div>{formatKoreanCurrency(product.price)}</div>
       </Card.Body>
       <Card.Footer css={productCardFooterStyle}>
         <Button variant="secondary" size="sm">

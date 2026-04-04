@@ -1,19 +1,37 @@
-import { getProducts } from "@/apis";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { getProducts } from "@/apis";
+import type { ProductListResponse, SortOption } from "@/types";
 
-const PRODUCT_QUERY_KEY = (
-  keyword: string,
-  categories: string,
-  sort: string,
-  size: number,
-) => ["products", keyword, categories, sort, size];
-
-interface useProductListProps {
-  keyword: string;
-  categories: string;
-  sort: string;
-  page?: number;
+interface UseProductListProps {
+  keyword?: string;
+  categories?: string;
+  sort: SortOption;
   size?: number;
+}
+
+function normalizeQueryValue(value?: string) {
+  return value?.trim() ?? "";
+}
+
+function normalizePageSize(size = 10) {
+  return Number.isInteger(size) && size > 0 ? size : 10;
+}
+
+const PRODUCT_QUERY_KEY = ({
+  keyword,
+  categories,
+  sort,
+  size,
+}: Required<UseProductListProps>) => [
+  "products",
+  keyword,
+  categories,
+  sort,
+  size,
+];
+
+function getNextPageParam(lastPage: ProductListResponse) {
+  return lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined;
 }
 
 export default function useProductList({
@@ -21,27 +39,54 @@ export default function useProductList({
   categories,
   sort,
   size = 10,
-}: useProductListProps) {
-  return useSuspenseInfiniteQuery({
-    queryKey: PRODUCT_QUERY_KEY(keyword, categories, sort, size),
+}: UseProductListProps) {
+  const normalizedKeyword = normalizeQueryValue(keyword);
+  const normalizedCategories = normalizeQueryValue(categories);
+  const normalizedSize = normalizePageSize(size);
+
+  const query = useSuspenseInfiniteQuery({
+    queryKey: PRODUCT_QUERY_KEY({
+      keyword: normalizedKeyword,
+      categories: normalizedCategories,
+      sort,
+      size: normalizedSize,
+    }),
     queryFn: ({ pageParam = 1 }) =>
-      getProducts({ page: pageParam, keyword, categories, sort, size }),
+      getProducts({
+        page: pageParam,
+        keyword: normalizedKeyword,
+        categories: normalizedCategories,
+        sort,
+        size: normalizedSize,
+      }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) => {
-      const nextPage = lastPage.products.length
-        ? allPages.length + 1
-        : undefined;
-      return nextPage;
-    },
+    getNextPageParam,
     select: (data) => data.pages.flatMap((page) => page.products),
   });
+
+  const loadMore = () => {
+    if (!query.hasNextPage || query.isFetchingNextPage) {
+      return;
+    }
+
+    void query.fetchNextPage();
+  };
+
+  return {
+    ...query,
+    loadMore,
+  };
 }
 
-useProductList.getQueryKeys = function ({
+useProductList.getQueryKeys = ({
   keyword,
   categories,
   sort,
   size = 10,
-}: useProductListProps) {
-  return PRODUCT_QUERY_KEY(keyword, categories, sort, size);
-};
+}: UseProductListProps) =>
+  PRODUCT_QUERY_KEY({
+    keyword: normalizeQueryValue(keyword),
+    categories: normalizeQueryValue(categories),
+    sort,
+    size: normalizePageSize(size),
+  });

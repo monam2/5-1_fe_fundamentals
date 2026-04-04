@@ -4,6 +4,7 @@ interface ImpressionAreaProps {
   children: React.ReactNode;
   areaThreshold: number;
   onImpressionStart?: () => void;
+  disabled?: boolean;
   style?: React.CSSProperties;
 }
 
@@ -11,18 +12,21 @@ export default function ImpressionArea({
   children,
   areaThreshold,
   onImpressionStart,
+  disabled = false,
   style,
   ...otherProps
 }: ImpressionAreaProps) {
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!observerRef.current) return;
+    if (!observerRef.current || disabled || !onImpressionStart) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          onImpressionStart?.();
+          onImpressionStart();
         }
       },
       { threshold: areaThreshold },
@@ -33,7 +37,7 @@ export default function ImpressionArea({
     return () => {
       observer.disconnect();
     };
-  }, [areaThreshold, onImpressionStart]);
+  }, [areaThreshold, disabled, onImpressionStart]);
 
   return (
     <div ref={observerRef} style={style} {...otherProps}>
