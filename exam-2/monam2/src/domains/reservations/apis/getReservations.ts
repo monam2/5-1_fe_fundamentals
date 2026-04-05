@@ -1,9 +1,9 @@
-import { client } from "@/shared/apis";
-import type { ReservationsResponse } from "@/shared/types";
+import { client } from '@/shared/apis';
+import type { ReservationsResponse } from '@/shared/types';
 
 export default function getReservations(date: string) {
   return client
-    .get("/reservations", {
+    .get('reservations', {
       searchParams: {
         date,
       },
