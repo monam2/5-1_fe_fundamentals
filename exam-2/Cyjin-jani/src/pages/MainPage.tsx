@@ -7,6 +7,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { TimelineTable } from '@/features/reservations/components/TimelineTable';
 import { RoomFilter } from '@/features/rooms/components/RoomFilter';
 import { formatLocalDate } from '@/lib/dateFormat';
+import { LoadingFallback } from '@/shared/components/LoadingFallback';
+import { QueryErrorFallback } from '@/shared/components/QueryErrorFallback';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
@@ -95,16 +97,9 @@ export function MainPage() {
           <ErrorBoundary
             resetKeys={[selectedDate]}
             onReset={reset}
-            fallbackRender={({ resetErrorBoundary }) => (
-              <div>
-                <p>데이터를 불러오지 못했습니다.</p>
-                <button type="button" onClick={() => resetErrorBoundary()}>
-                  다시 시도
-                </button>
-              </div>
-            )}
+            FallbackComponent={QueryErrorFallback}
           >
-            <Suspense key={selectedDate} fallback={<p>로딩 중…</p>}>
+            <Suspense key={selectedDate} fallback={<LoadingFallback />}>
               <TimelineTable
                 date={selectedDate}
                 capacity={selectedCapacity}

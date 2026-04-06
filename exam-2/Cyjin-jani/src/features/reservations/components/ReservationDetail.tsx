@@ -93,8 +93,8 @@ export function ReservationDetail({ id }: ReservationDetailProps) {
         </dl>
 
         <div className="mt-8 flex justify-between">
-          <Button variant="outline" onClick={() => navigate(-1)}>
-            뒤로 가기
+          <Button variant="outline" onClick={() => navigate('/')}>
+            메인으로 가기
           </Button>
           <Button variant="destructive" onClick={() => setIsDialogOpen(true)}>
             예약 취소

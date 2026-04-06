@@ -15,6 +15,8 @@ import {
 } from '@/features/reservations/lib/timelineSlots';
 import { cn } from '@/lib/utils';
 import type { Equipment } from '@/features/rooms/types';
+import { Button } from '@/shared/components/ui/button';
+import { UserIcon } from 'lucide-react';
 
 interface TimelineTableProps {
   date: string;
@@ -46,10 +48,20 @@ export function TimelineTable({ date, capacity = null, equipment = [] }: Timelin
   };
 
   return (
-    <section className="flex flex-col min-h-0 flex-1 w-full">
-      <p className="mb-2 text-sm text-gray-600">
-        {date} 예약된 회의실 : {reservations.length}건
-      </p>
+    <section className="flex flex-col items-center min-h-0 flex-1 w-full max-w-[1370px]">
+      <div className="flex justify-between w-full">
+        <p className="mb-2 text-sm text-gray-600 self-start">
+          {date} 예약된 회의실 : {reservations.length}건
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => navigate('/my-reservations')}
+          aria-label="내 예약 목록"
+          className="mb-2"
+        >
+          <UserIcon className="h-4 w-4 shrink-0 text-muted-foreground" />내 예약 목록
+        </Button>
+      </div>
       <div className="w-fit max-w-full overflow-y-auto overflow-x-auto overscroll-none rounded-lg border border-slate-200 border-r-0 bg-white">
         <table className="w-fit border-separate border-spacing-0  text-sm">
           <thead>

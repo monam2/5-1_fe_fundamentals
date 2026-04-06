@@ -5,6 +5,8 @@ import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import { HTTPError } from 'ky';
 
 import { ReservationDetail } from '@/features/reservations/components/ReservationDetail';
+import { LoadingFallback } from '@/shared/components/LoadingFallback';
+import { QueryErrorFallback } from '@/shared/components/QueryErrorFallback';
 import { Button } from '@/shared/components/ui/button';
 
 export function ReservationDetailPage() {
@@ -19,7 +21,7 @@ export function ReservationDetailPage() {
       <QueryErrorResetBoundary>
         {({ reset }) => (
           <ErrorBoundary onReset={reset} FallbackComponent={ErrorFallback}>
-            <Suspense fallback={<p className="py-16 text-muted-foreground">로딩 중…</p>}>
+            <Suspense fallback={<LoadingFallback />}>
               <ReservationDetail id={id} />
             </Suspense>
           </ErrorBoundary>
@@ -44,12 +46,5 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
     );
   }
 
-  return (
-    <div className="flex flex-col items-center gap-4 py-16 text-center">
-      <p className="text-lg font-medium">데이터를 불러오지 못했습니다.</p>
-      <Button variant="outline" onClick={resetErrorBoundary}>
-        다시 시도
-      </Button>
-    </div>
-  );
+  return <QueryErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />;
 }

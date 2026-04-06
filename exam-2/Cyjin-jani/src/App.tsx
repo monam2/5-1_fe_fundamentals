@@ -12,7 +12,7 @@ function App() {
         <Route path="/" element={<MainPage />} />
         <Route path="/reservations/new" element={<ReservationAddPage />} />
         <Route path="/reservations/:id" element={<ReservationDetailPage />} />
-        <Route path="/my/reservations" element={<MyReservationsPage />} />
+        <Route path="/my-reservations" element={<MyReservationsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

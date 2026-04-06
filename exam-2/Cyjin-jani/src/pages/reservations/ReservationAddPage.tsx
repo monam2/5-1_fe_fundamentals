@@ -3,6 +3,9 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useSearchParams } from 'react-router-dom';
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
 
+import { LoadingFallback } from '@/shared/components/LoadingFallback';
+import { QueryErrorFallback } from '@/shared/components/QueryErrorFallback';
+
 import { ReservationForm } from '@/features/reservations/components/ReservationForm';
 
 export function ReservationAddPage() {
@@ -18,18 +21,8 @@ export function ReservationAddPage() {
 
       <QueryErrorResetBoundary>
         {({ reset }) => (
-          <ErrorBoundary
-            onReset={reset}
-            fallbackRender={({ resetErrorBoundary }) => (
-              <div>
-                <p>데이터를 불러오지 못했습니다.</p>
-                <button type="button" onClick={() => resetErrorBoundary()}>
-                  다시 시도
-                </button>
-              </div>
-            )}
-          >
-            <Suspense fallback={<p>로딩 중…</p>}>
+          <ErrorBoundary onReset={reset} FallbackComponent={QueryErrorFallback}>
+            <Suspense fallback={<LoadingFallback />}>
               <ReservationForm
                 defaultRoomId={roomId}
                 defaultDate={date}
