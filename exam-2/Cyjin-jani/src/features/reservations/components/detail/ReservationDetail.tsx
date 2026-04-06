@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { CalendarIcon, ClockIcon, UserIcon, UsersIcon, BuildingIcon } from 'lucide-react';
 
 import { Button } from '@/shared/components/ui/button';
 import { useReservation } from '@/features/reservations/hooks/queries/useReservation';
 import { useDeleteReservation } from '@/features/reservations/hooks/queries/useDeleteReservation';
-import { reservationsQueryKeys } from '@/features/reservations/hooks/queries/querykeys';
 import { useRoomName } from '@/features/rooms/hooks/useRoomName';
 import { ReservationCancelDialog } from './ReservationCancelDialog';
 
@@ -17,7 +15,6 @@ interface ReservationDetailProps {
 
 export function ReservationDetail({ id }: ReservationDetailProps) {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: reservation } = useReservation(id);
@@ -25,12 +22,6 @@ export function ReservationDetail({ id }: ReservationDetailProps) {
 
   const { mutate: deleteReservation, isPending } = useDeleteReservation({
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: reservationsQueryKeys.allByDate(reservation.date),
-      });
-      queryClient.removeQueries({
-        queryKey: reservationsQueryKeys.detailById(id),
-      });
       toast.success('예약이 취소되었습니다.');
       navigate(-1);
     },
