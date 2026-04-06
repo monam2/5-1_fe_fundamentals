@@ -2,17 +2,14 @@ import { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSearchParams } from 'react-router-dom';
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+import { DateNavigator } from '@/features/reservations/components/DateNavigator';
 import { TimelineTable } from '@/features/reservations/components/TimelineTable';
 import { RoomsFilter } from '@/features/rooms/components/RoomsFilter';
+import type { Equipment } from '@/features/rooms/types';
 import { formatLocalDate } from '@/lib/dateFormat';
 import { LoadingFallback } from '@/shared/components/LoadingFallback';
 import { QueryErrorFallback } from '@/shared/components/QueryErrorFallback';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import type { Equipment } from '@/features/rooms/types';
 
 export function MainPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,28 +57,7 @@ export function MainPage() {
     <main className="flex flex-col items-center w-full h-dvh overflow-hidden mx-auto max-w-[1600px] px-6 py-6">
       <h1 className="mb-6 text-2xl font-bold">회의실 예약 현황</h1>
 
-      <div className="flex items-center gap-2 mb-4">
-        <Button variant="outline" size="icon" onClick={() => moveDate(-1)} aria-label="이전 날짜">
-          <ChevronLeft />
-        </Button>
-
-        <div className="flex items-center gap-1.5">
-          <Label htmlFor="timeline-date" className="sr-only">
-            날짜 선택
-          </Label>
-          <Input
-            id="timeline-date"
-            type="date"
-            value={selectedDate}
-            onChange={handleDateChange}
-            className="w-40 cursor-pointer"
-          />
-        </div>
-
-        <Button variant="outline" size="icon" onClick={() => moveDate(1)} aria-label="다음 날짜">
-          <ChevronRight />
-        </Button>
-      </div>
+      <DateNavigator date={selectedDate} onDateChange={handleDateChange} onMove={moveDate} />
 
       <div className="mb-4 w-full flex justify-center">
         <RoomsFilter
