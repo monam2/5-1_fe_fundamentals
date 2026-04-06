@@ -13,7 +13,7 @@ import {
   TIMELINE_SLOTS,
   TIMELINE_HOURS,
 } from '@/features/reservations/lib/timelineSlots';
-import { cn } from '@/lib/cn';
+import { cn } from '@/lib/utils';
 
 export function TimelineTable({ date }: { date: string }) {
   const navigate = useNavigate();
