@@ -1,24 +1,25 @@
-import { Suspense, useState } from 'react';
+import { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { useSearchParams } from 'react-router-dom';
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
 
 import { TimelineTable } from '@/features/reservations/components/TimelineTable';
 import { formatLocalDate } from '@/lib/dateFormat';
 
 export function MainPage() {
-  const [selectedDate, setSelectedDate] = useState(() => formatLocalDate(new Date()));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedDate = searchParams.get('date') ?? formatLocalDate(new Date());
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchParams({ date: e.target.value });
+  };
 
   return (
-    <main>
-      <h1>타임라인</h1>
+    <main className="w-full h-dvh overflow-hidden mx-auto max-w-full px-6 py-6">
+      <h1>회의실 예약 현황</h1>
       <label htmlFor="timeline-date">
-        날짜{' '}
-        <input
-          id="timeline-date"
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-        />
+        날짜 선택:{' '}
+        <input id="timeline-date" type="date" value={selectedDate} onChange={handleDateChange} />
       </label>
 
       <QueryErrorResetBoundary>
