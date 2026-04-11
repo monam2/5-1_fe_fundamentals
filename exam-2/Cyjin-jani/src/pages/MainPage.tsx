@@ -4,10 +4,10 @@ import { useSearchParams } from 'react-router-dom';
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
 
 import { DateNavigator } from '@/features/reservations/components/DateNavigator';
-import { TimelineTable } from '@/features/reservations/components/TimelineTable';
+import { TimelineTableContainer } from '@/features/reservations/components/TimelineTableContainer';
 import { RoomsFilter } from '@/features/rooms/components/RoomsFilter';
 import type { Equipment } from '@/features/rooms/types';
-import { formatLocalDate } from '@/lib/dateFormat';
+import { formatLocalDate, parseLocalDate } from '@/lib/dateFormat';
 import { LoadingFallback } from '@/shared/components/LoadingFallback';
 import { QueryErrorFallback } from '@/shared/components/QueryErrorFallback';
 
@@ -40,7 +40,7 @@ export function MainPage() {
   };
 
   const moveDate = (offset: number) => {
-    const next = new Date(selectedDate);
+    const next = parseLocalDate(selectedDate);
     next.setDate(next.getDate() + offset);
     updateParams({ date: formatLocalDate(next) });
   };
@@ -54,9 +54,7 @@ export function MainPage() {
   };
 
   return (
-    <main className="flex flex-col items-center w-full h-dvh overflow-hidden mx-auto max-w-[1600px] px-6 py-6">
-      <h1 className="mb-6 text-2xl font-bold">회의실 예약 현황</h1>
-
+    <main className="flex flex-col items-center w-full flex-1 overflow-hidden mx-auto max-w-[1600px] px-6 py-6">
       <DateNavigator date={selectedDate} onDateChange={handleDateChange} onMove={moveDate} />
 
       <div className="mb-4 w-full flex justify-center">
@@ -75,8 +73,8 @@ export function MainPage() {
             onReset={reset}
             FallbackComponent={QueryErrorFallback}
           >
-            <Suspense key={selectedDate} fallback={<LoadingFallback />}>
-              <TimelineTable
+            <Suspense fallback={<LoadingFallback />}>
+              <TimelineTableContainer
                 date={selectedDate}
                 capacity={selectedCapacity}
                 equipment={selectedEquipment}

@@ -8,26 +8,26 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select';
 
-interface TimeSlotOption {
+interface SelectOption {
   label: string;
   value: string;
 }
 
-interface TimeSelectFieldProps<TFieldValues extends FieldValues> {
+interface SelectFieldProps<TFieldValues extends FieldValues, TOption extends SelectOption> {
   id: string;
   name: FieldPath<TFieldValues>;
   control: Control<TFieldValues>;
-  slots: TimeSlotOption[];
+  options: TOption[];
   placeholder: string;
 }
 
-export function TimeSelectField<TFieldValues extends FieldValues>({
+export function SelectField<TFieldValues extends FieldValues, TOption extends SelectOption>({
   id,
   name,
   control,
-  slots,
+  options,
   placeholder,
-}: TimeSelectFieldProps<TFieldValues>) {
+}: SelectFieldProps<TFieldValues, TOption>) {
   return (
     <Controller
       name={name}
@@ -38,9 +38,9 @@ export function TimeSelectField<TFieldValues extends FieldValues>({
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>
-            {slots.map((slot) => (
-              <SelectItem key={slot.value} value={slot.value}>
-                {slot.label}
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
