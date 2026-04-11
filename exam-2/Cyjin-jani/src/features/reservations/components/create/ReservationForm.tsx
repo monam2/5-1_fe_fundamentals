@@ -4,7 +4,7 @@ import { TIMELINE_SLOTS, END_TIME_SLOTS } from '@/features/reservations/lib/time
 import { useRooms } from '@/features/rooms/hooks/queries/useRooms';
 import { ConflictErrorDialog } from './ConflictErrorDialog';
 import { FormFieldWithLabel } from './FormFieldWithLabel';
-import { TimeSelectField } from './TimeSelectField';
+import { SelectField } from '@/shared/components/SelectField';
 import { useReservationForm } from '../../hooks/useReservationForm';
 
 interface ReservationFormProps {
@@ -35,11 +35,11 @@ export function ReservationForm({
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2 w-[480px]">
         {/* 회의실 선택 */}
         <FormFieldWithLabel htmlFor="roomId" label="회의실" errorMessage={errors.roomId?.message}>
-          <TimeSelectField
+          <SelectField
             id="roomId"
             name="roomId"
             control={control}
-            slots={rooms.map((room) => ({ label: room.name, value: room.id }))}
+            options={rooms.map((room) => ({ label: room.name, value: room.id }))}
             placeholder="회의실을 선택하세요"
           />
         </FormFieldWithLabel>
@@ -53,11 +53,11 @@ export function ReservationForm({
           label="시작 시간"
           errorMessage={errors.startTime?.message}
         >
-          <TimeSelectField
+          <SelectField
             id="startTime"
             name="startTime"
             control={control}
-            slots={TIMELINE_SLOTS.map((slot) => ({ label: slot.label, value: slot.label }))}
+            options={TIMELINE_SLOTS.map((slot) => ({ label: slot.label, value: slot.label }))}
             placeholder="시작 시간을 선택하세요"
           />
         </FormFieldWithLabel>
@@ -67,11 +67,11 @@ export function ReservationForm({
           label="종료 시간"
           errorMessage={errors.endTime?.message}
         >
-          <TimeSelectField
+          <SelectField
             id="endTime"
             name="endTime"
             control={control}
-            slots={END_TIME_SLOTS}
+            options={END_TIME_SLOTS}
             placeholder="종료 시간을 선택하세요"
           />
         </FormFieldWithLabel>

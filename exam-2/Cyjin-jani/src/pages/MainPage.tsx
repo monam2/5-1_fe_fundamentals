@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
 
 import { DateNavigator } from '@/features/reservations/components/DateNavigator';
-import { TimelineTable } from '@/features/reservations/components/TimelineTable';
+import { TimelineTableContainer } from '@/features/reservations/components/TimelineTableContainer';
 import { RoomsFilter } from '@/features/rooms/components/RoomsFilter';
 import type { Equipment } from '@/features/rooms/types';
 import { formatLocalDate, parseLocalDate } from '@/lib/dateFormat';
@@ -76,7 +76,7 @@ export function MainPage() {
             FallbackComponent={QueryErrorFallback}
           >
             <Suspense fallback={<LoadingFallback />}>
-              <TimelineTable
+              <TimelineTableContainer
                 date={selectedDate}
                 capacity={selectedCapacity}
                 equipment={selectedEquipment}
