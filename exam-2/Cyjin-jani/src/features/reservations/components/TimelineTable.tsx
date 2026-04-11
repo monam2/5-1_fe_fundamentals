@@ -12,6 +12,7 @@ import {
   parseTimeToMinutes,
   TIMELINE_SLOTS,
   TIMELINE_HOURS,
+  TIMELINE_SLOT_MINUTES,
 } from '@/features/reservations/lib/timelineSlots';
 import { cn } from '@/lib/utils';
 import type { Equipment } from '@/features/rooms/types';
@@ -104,30 +105,43 @@ export function TimelineTable({ date, capacity = null, equipment = [] }: Timelin
                       slot.startMinutes,
                       slot.endMinutes,
                     );
-                    const isReservationStart = overlapping.some(
-                      (r) => parseTimeToMinutes(r.startTime) === slot.startMinutes,
-                    );
+                    const reservation = overlapping[0];
+                    const isReservationStart =
+                      reservation !== undefined &&
+                      parseTimeToMinutes(reservation.startTime) === slot.startMinutes;
+                    const isOccupiedMiddle =
+                      overlapping.length > 0 && !isReservationStart;
+
+                    if (isOccupiedMiddle) return null;
+
+                    const colSpan = isReservationStart
+                      ? Math.round(
+                          (parseTimeToMinutes(reservation.endTime) -
+                            parseTimeToMinutes(reservation.startTime)) /
+                            TIMELINE_SLOT_MINUTES,
+                        )
+                      : 1;
+
                     const isHalfHourBorder = index % 2 === 0;
                     return (
                       <td
                         key={`${room.id}-${slot.startMinutes}`}
+                        colSpan={colSpan}
                         className={cn(
                           'max-w-17 min-w-17 border-b border-slate-100 px-1.5 py-2 align-top text-xs text-slate-700 cursor-pointer',
                           isHalfHourBorder
                             ? '[border-right-style:dashed] border-r border-slate-200'
                             : 'border-r border-slate-200',
-                          overlapping.length > 0 ? 'bg-blue-300' : '',
+                          isReservationStart ? 'bg-blue-300' : '',
                         )}
                         onClick={() =>
-                          overlapping.length > 0
-                            ? handleReservationClick(overlapping[0].id)
+                          isReservationStart
+                            ? handleReservationClick(reservation.id)
                             : handleEmptySlotClick(room.id, slot.label)
                         }
                       >
                         {isReservationStart ? (
-                          <span className="overflow-visible whitespace-nowrap bg-blue-300">
-                            {overlapping[0]?.title}
-                          </span>
+                          <span className="whitespace-nowrap">{reservation.title}</span>
                         ) : (
                           <span className="text-slate-300"> </span>
                         )}
