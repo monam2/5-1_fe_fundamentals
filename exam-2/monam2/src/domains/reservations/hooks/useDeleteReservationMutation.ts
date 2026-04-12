@@ -1,52 +1,28 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import deleteReservation from '@/domains/reservations/apis/deleteReservation';
+import useMyReservations from "@/domains/my-reservations/hooks/useMyReservations";
+import deleteReservation from "@/domains/reservations/apis/deleteReservation";
+import useReservation from "@/domains/reservations/hooks/useReservation";
+import useReservations from "@/domains/reservations/hooks/useReservations";
 
-import type { ApiErrorResponse, ApiMessageResponse } from '@/shared/types';
-
-export type DeleteReservationResult =
-  | { type: 'success'; data: ApiMessageResponse }
-  | { type: 'error'; data: ApiErrorResponse };
-
-function isApiErrorResponse(
-  value: ApiMessageResponse | ApiErrorResponse,
-): value is ApiErrorResponse {
-  return 'error' in value;
-}
+import type { ApiMessageResponse } from "@/shared/types";
 
 export default function useDeleteReservationMutation(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (): Promise<DeleteReservationResult> => {
-      const result = await deleteReservation(id);
-
-      if (isApiErrorResponse(result)) {
-        return {
-          type: 'error' as const,
-          data: result,
-        };
-      }
-
-      return {
-        type: 'success' as const,
-        data: result,
-      };
+    mutationFn: (): Promise<ApiMessageResponse> => {
+      return deleteReservation(id);
     },
-    onSuccess: ({ type }) => {
-      if (type !== 'success') return;
-
+    onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['reservations'],
+        queryKey: useReservations.getQueryKeys(),
       });
       void queryClient.invalidateQueries({
-        queryKey: ['my-reservations'],
+        queryKey: useMyReservations.getQueryKeys(),
       });
       void queryClient.invalidateQueries({
-        queryKey: ['rooms'],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ['reservation', id],
+        queryKey: useReservation.getQueryKeys(id),
       });
     },
   });

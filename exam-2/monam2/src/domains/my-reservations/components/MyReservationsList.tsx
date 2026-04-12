@@ -1,19 +1,14 @@
-import { Link } from "wouter";
-import { css } from "@emotion/react";
+import { css } from '@emotion/react';
+import { Link } from 'wouter';
 
-import { useMyReservations } from "@/domains/my-reservations/hooks";
-
-import {
-  isEmpty,
-  formatCreatedAt,
-  formatReservationDate,
-} from "@/shared/utils";
-import { Card } from "@/shared/ui";
+import { useMyReservations } from '@/domains/my-reservations/hooks';
+import { Card } from '@/shared/ui';
+import { formatCreatedAt, formatReservationDate } from '@/shared/utils';
 
 export default function MyReservationsList() {
   const { data: reservations } = useMyReservations();
 
-  if (isEmpty(reservations)) {
+  if (reservations.length === 0) {
     return <EmptyReservations />;
   }
 
@@ -88,35 +83,35 @@ function ReservationMetaItem({
 }
 
 const listStyle = css({
-  display: "grid",
-  gap: "16px",
-  marginTop: "24px",
+  display: 'grid',
+  gap: '16px',
+  marginTop: '24px',
 });
 
 const linkResetStyle = css({
-  textDecoration: "none",
-  color: "inherit",
+  textDecoration: 'none',
+  color: 'inherit',
 });
 
 const emptyStateStyle = css({
-  display: "grid",
-  gap: "12px",
-  marginTop: "24px",
-  padding: "28px",
-  borderRadius: "20px",
-  border: "1px dashed #cbd5e1",
-  backgroundColor: "#f8fafc",
+  display: 'grid',
+  gap: '12px',
+  marginTop: '24px',
+  padding: '28px',
+  borderRadius: '20px',
+  border: '1px dashed #cbd5e1',
+  backgroundColor: '#f8fafc',
 });
 
 const emptyTitleStyle = css({
   margin: 0,
-  fontSize: "1.125rem",
+  fontSize: '1.125rem',
   fontWeight: 700,
-  color: "#0f172a",
+  color: '#0f172a',
 });
 
 const emptyDescriptionStyle = css({
   margin: 0,
-  color: "#475569",
+  color: '#475569',
   lineHeight: 1.6,
 });

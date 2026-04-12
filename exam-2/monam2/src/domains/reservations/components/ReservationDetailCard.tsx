@@ -1,31 +1,21 @@
-import { css } from "@emotion/react";
-import { useState } from "react";
-import { useLocation, useParams } from "wouter";
+import { css } from '@emotion/react';
+import { useState } from 'react';
+import { useLocation, useParams } from 'wouter';
 
 import {
-  useReservation,
   generateReservationParams,
   useDeleteReservationMutation,
-} from "@/domains/reservations/hooks";
-import { useRooms } from "@/domains/timeline/hooks";
-
-import type {
-  ApiErrorResponse,
-  ReservationResponse,
-  Room,
-} from "@/shared/types";
-import { Button, Card } from "@/shared/ui";
-import { formatCreatedAt, formatReservationDate } from "@/shared/utils";
-
-function isApiErrorResponse(
-  value: ReservationResponse | ApiErrorResponse,
-): value is ApiErrorResponse {
-  return "error" in value;
-}
-
-function isNotFoundError(value: ApiErrorResponse) {
-  return value.error === "Not Found";
-}
+  useReservation,
+} from '@/domains/reservations/hooks';
+import { useRooms } from '@/domains/rooms/hooks';
+import { Button, Card } from '@/shared/ui';
+import {
+  formatCreatedAt,
+  formatReservationDate,
+  getApiErrorMessage,
+  isApiErrorResponse,
+  isNotFoundError,
+} from '@/shared/utils';
 
 export default function ReservationDetailCard() {
   const { id } = useParams<{ id: string }>();
@@ -43,7 +33,7 @@ export default function ReservationDetailCard() {
           title="예약을 찾을 수 없습니다."
           description="이미 취소되었거나 잘못된 예약 ID일 수 있습니다."
           actionLabel="타임라인으로 이동"
-          onAction={() => setLocation("/")}
+          onAction={() => setLocation('/')}
         />
       );
     }
@@ -53,29 +43,34 @@ export default function ReservationDetailCard() {
         title="예약 상세를 불러오지 못했습니다."
         description={reservationResult.message}
         actionLabel="이전 화면으로 이동"
-        onAction={() => setLocation("/my-reservations")}
+        onAction={() => setLocation('/my-reservations')}
       />
     );
   }
 
   const reservation = reservationResult.reservation;
-  const room = rooms.find((item: Room) => item.id === reservation.roomId);
+  const room = rooms.find((item) => item.id === reservation.roomId);
 
   const handleDelete = async () => {
-    const shouldDelete = window.confirm("이 예약을 취소하시겠습니까?");
+    const shouldDelete = window.confirm('이 예약을 취소하시겠습니까?');
     if (!shouldDelete) return;
 
     try {
-      const result = await mutateAsync();
+      await mutateAsync();
 
-      if (result.type === "error") {
-        setSubmitError(result.data.message);
+      if (window.history.length > 1) {
+        window.history.back();
         return;
       }
 
-      setLocation("/my-reservations");
-    } catch {
-      setSubmitError("예약 취소에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      setLocation('/my-reservations');
+    } catch (error) {
+      setSubmitError(
+        await getApiErrorMessage(
+          error,
+          '예약 취소에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        ),
+      );
     }
   };
 
@@ -128,7 +123,7 @@ export default function ReservationDetailCard() {
             type="button"
             size="lg"
             variant="secondary"
-            onClick={() => setLocation("/my-reservations")}
+            onClick={() => setLocation('/my-reservations')}
           >
             목록으로
           </Button>
@@ -185,27 +180,27 @@ function StatusCard({
 }
 
 const statusContentStyle = css({
-  display: "grid",
-  gap: "10px",
+  display: 'grid',
+  gap: '10px',
 });
 
 const statusActionStyle = css({
-  display: "flex",
-  justifyContent: "flex-end",
+  display: 'flex',
+  justifyContent: 'flex-end',
 });
 
 const actionBarStyle = css({
-  display: "flex",
-  justifyContent: "flex-end",
-  gap: "12px",
-  "@media (max-width: 720px)": {
-    flexDirection: "column-reverse",
+  display: 'flex',
+  justifyContent: 'flex-end',
+  gap: '12px',
+  '@media (max-width: 720px)': {
+    flexDirection: 'column-reverse',
   },
 });
 
 const errorTextStyle = css({
   margin: 0,
-  color: "#b91c1c",
-  fontSize: "0.875rem",
+  color: '#b91c1c',
+  fontSize: '0.875rem',
   lineHeight: 1.5,
 });

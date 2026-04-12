@@ -1,31 +1,18 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import postReservation from '@/domains/reservations/apis/postReservation';
+import postReservation from "@/domains/reservations/apis/postReservation";
+import useReservations from "@/domains/reservations/hooks/useReservations";
 
 import type {
-  ApiErrorResponse,
   ConflictError,
   CreateReservationRequest,
-  NewReservationResponseType,
   ReservationResponse,
-} from '@/shared/types';
+} from "@/shared/types";
+import { readConflictError } from "@/shared/utils";
 
 export type CreateReservationResult =
-  | { type: 'success'; data: ReservationResponse }
-  | { type: 'conflict'; data: ConflictError }
-  | { type: 'error'; data: ApiErrorResponse };
-
-function isConflictError(
-  value: NewReservationResponseType,
-): value is ConflictError {
-  return 'error' in value && value.error === 'Conflict';
-}
-
-function isApiErrorResponse(
-  value: NewReservationResponseType,
-): value is ApiErrorResponse {
-  return 'error' in value;
-}
+  | { type: "success"; data: ReservationResponse }
+  | { type: "conflict"; data: ConflictError };
 
 export default function useCreateReservationMutation() {
   const queryClient = useQueryClient();
@@ -34,35 +21,34 @@ export default function useCreateReservationMutation() {
     mutationFn: async (
       payload: CreateReservationRequest,
     ): Promise<CreateReservationResult> => {
-      const result = await postReservation(payload);
+      try {
+        const result = await postReservation(payload);
 
-      if (isConflictError(result)) {
         return {
-          type: 'conflict' as const,
+          type: "success" as const,
           data: result,
         };
-      }
+      } catch (error) {
+        const conflictError = await readConflictError(error);
 
-      if (isApiErrorResponse(result)) {
-        return {
-          type: 'error' as const,
-          data: result,
-        };
-      }
+        if (conflictError) {
+          return {
+            type: "conflict" as const,
+            data: conflictError,
+          };
+        }
 
-      return {
-        type: 'success' as const,
-        data: result,
-      };
+        throw error;
+      }
     },
     onSuccess: ({ type }) => {
-      if (type !== 'success') return;
+      if (type !== "success") {
+        return;
+      }
 
+      // Room metadata does not change, so the rooms cache stays intact.
       void queryClient.invalidateQueries({
-        queryKey: ['reservations'],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ['rooms'],
+        queryKey: useReservations.getQueryKeys(),
       });
     },
   });

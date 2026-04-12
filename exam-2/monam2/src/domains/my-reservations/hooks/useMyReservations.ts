@@ -2,7 +2,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { getMyReservations } from "@/domains/my-reservations/apis";
 
-const QUERY_KEY = ["my-reservations"];
+const QUERY_KEY = ["my-reservations"] as const;
 
 export default function useMyReservations() {
   return useSuspenseQuery({
