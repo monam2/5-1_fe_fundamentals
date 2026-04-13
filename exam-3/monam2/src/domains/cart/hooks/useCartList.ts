@@ -1,5 +1,11 @@
 import { useMemo, useSyncExternalStore } from 'react';
-import { cartStorage, EMPTY_CART_SNAPSHOT } from '@/domains/cart/utils';
+
+import {
+  cartStore,
+  EMPTY_CART,
+  getCartKey,
+  mergeCartItems,
+} from '@/domains/cart/utils';
 import type { CartItem } from '@/shared/types';
 
 function parseCartItems(snapshot: string) {
@@ -10,14 +16,22 @@ function parseCartItems(snapshot: string) {
   }
 }
 
-export default function useCartList(storage = cartStorage) {
+export default function useCartList(storage = cartStore) {
   const cartSnapshot = useSyncExternalStore(
     storage.subscribe,
     storage.getSnapshot,
-    () => EMPTY_CART_SNAPSHOT,
+    () => EMPTY_CART,
   );
 
-  const items = useMemo(() => parseCartItems(cartSnapshot), [cartSnapshot]);
+  const items = useMemo(
+    () =>
+      mergeCartItems(parseCartItems(cartSnapshot)).map((item) => ({
+        ...item,
+        cartKey: getCartKey(item),
+        totalPrice: item.unitPrice * item.quantity,
+      })),
+    [cartSnapshot],
+  );
 
   return useMemo(() => {
     const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);

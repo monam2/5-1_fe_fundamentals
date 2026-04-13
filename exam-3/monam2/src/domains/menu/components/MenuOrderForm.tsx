@@ -1,18 +1,12 @@
-import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router";
-
+import { toast } from "sonner";
+import { addToCart } from "@/domains/cart/utils";
 import {
-  hasBatchim,
-  getSelectedLabels,
-  calculateUnitPrice,
-  getSelectRequiredMessage,
-} from "@/domains/menu/utils";
-import {
-  QuantityField,
   GridOptionField,
   ListOptionField,
-  SelectOptionField,
+  QuantityField,
   SelectOptionBottomSheet,
+  SelectOptionField,
 } from "@/domains/menu/components/order";
 import {
   contentStyle,
@@ -26,10 +20,14 @@ import {
   optionMetaStyle,
   optionTitleGroupStyle,
 } from "@/domains/menu/components/order/styles";
-import { addCartItem } from "@/domains/cart/utils";
-import { useOrderForm } from "@/domains/menu/hooks";
-import { useMenuItem, useOptions } from "@/domains/menu/hooks";
+import { useMenuItem, useOptions, useOrderForm } from "@/domains/menu/hooks";
 
+import {
+  hasBatchim,
+  getSelectedLabels,
+  calculateUnitPrice,
+  getSelectRequiredMessage,
+} from "@/domains/menu/utils";
 import { routes } from "@/shared/routes";
 import { formatCurrencyKRW } from "@/shared/utils";
 import { Card, MenuCard } from "@/shared/components";
@@ -106,7 +104,7 @@ export default function MenuOrderForm() {
       unitPrice,
     };
 
-    addCartItem(nextCartItem);
+    addToCart(nextCartItem);
     navigate(routes.home);
   };
 

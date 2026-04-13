@@ -3,4 +3,5 @@ export const routes = {
   cart: "/cart",
   menuItem: (itemId: string) => `/menu/${itemId}`,
   orders: (orderId: string) => `/orders/${orderId}`,
+  notFound: "/not-found",
 } as const;

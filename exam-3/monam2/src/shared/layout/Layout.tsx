@@ -1,8 +1,9 @@
-import { css } from '@emotion/react';
-import type { PropsWithChildren } from 'react';
+import { css } from "@emotion/react";
+import type { PropsWithChildren } from "react";
 
-import FloatingCartButton from '@/domains/cart/components/FloatingCartButton';
-import { GlobalHeader } from '@/shared/components';
+import { FloatingCartButton } from "@/domains/cart/components";
+
+import { GlobalHeader } from "@/shared/components";
 
 export default function Layout({ children }: PropsWithChildren) {
   return (
@@ -15,7 +16,7 @@ export default function Layout({ children }: PropsWithChildren) {
 }
 
 const mainStyle = css({
-  minHeight: '100dvh',
-  paddingBottom: '96px',
-  backgroundColor: '#ffffff',
+  minHeight: "100dvh",
+  paddingBottom: "96px",
+  backgroundColor: "#ffffff",
 });

@@ -109,3 +109,8 @@ export interface OrdersResponse {
 export interface OrderResponse {
   order: Order;
 }
+
+export type CartLineItem = CartItem & {
+  cartKey: string;
+  totalPrice: number;
+};
